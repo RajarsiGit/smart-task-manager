@@ -1,158 +1,215 @@
-import { useState, useEffect } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
-import * as storage from '../utils/localStorage'
+import { useState, useEffect } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useApp } from "../context/AppContext";
+import * as storage from "../utils/localStorage";
 
 const TaskDetailScreen = () => {
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const [searchParams] = useSearchParams()
-  const { createTask, editTask, removeTask, projects, selectedDate } = useApp()
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const { createTask, editTask, removeTask, projects, selectedDate } = useApp();
 
-  const isNewTask = id === 'new'
-  const projectIdFromQuery = searchParams.get('projectId')
+  const isNewTask = id === "new";
+  const projectIdFromQuery = searchParams.get("projectId");
 
   const getFormattedDate = (date) => {
-    const d = new Date(date)
-    const year = d.getFullYear()
-    const month = String(d.getMonth() + 1).padStart(2, '0')
-    const day = String(d.getDate()).padStart(2, '0')
-    return `${year}-${month}-${day}`
-  }
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
 
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    date: isNewTask ? getFormattedDate(selectedDate) : getFormattedDate(new Date()),
-    startTime: '',
-    endTime: '',
+    title: "",
+    description: "",
+    date: isNewTask
+      ? getFormattedDate(selectedDate)
+      : getFormattedDate(new Date()),
+    startTime: "",
+    endTime: "",
     tags: [],
     categories: [],
-    status: 'in_progress',
-    projectId: projectIdFromQuery ? parseInt(projectIdFromQuery) : null
-  })
+    status: "in_progress",
+    projectId: projectIdFromQuery ? parseInt(projectIdFromQuery) : null,
+  });
 
-  const [newTag, setNewTag] = useState('')
-  const [newCategory, setNewCategory] = useState('')
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [newTag, setNewTag] = useState("");
+  const [newCategory, setNewCategory] = useState("");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   // Get the project associated with this task (either from query param or from task data)
   const getAssociatedProject = () => {
-    const projectId = projectIdFromQuery ? parseInt(projectIdFromQuery) : formData.projectId
-    return projectId ? projects.find(p => p.id === projectId) : null
-  }
+    const projectId = projectIdFromQuery
+      ? parseInt(projectIdFromQuery)
+      : formData.projectId;
+    return projectId ? projects.find((p) => p.id === projectId) : null;
+  };
 
-  const associatedProject = getAssociatedProject()
+  const associatedProject = getAssociatedProject();
 
-  const availableTags = ['Design', 'Meeting', 'Coding', 'Testing', 'Planning', 'Review']
-  const availableCategories = ['UI', 'Testing', 'Quick call', 'Backend', 'Frontend', 'DevOps']
+  const availableTags = [
+    "Design",
+    "Meeting",
+    "Coding",
+    "Testing",
+    "Planning",
+    "Review",
+  ];
+  const availableCategories = [
+    "UI",
+    "Testing",
+    "Quick call",
+    "Backend",
+    "Frontend",
+    "DevOps",
+  ];
 
   useEffect(() => {
     if (!isNewTask && id) {
-      const task = storage.getTaskById(id)
+      const task = storage.getTaskById(id);
       if (task) {
         setFormData({
           title: task.title,
-          description: task.description || '',
-          date: new Date(task.date).toISOString().split('T')[0],
-          startTime: task.startTime || '',
-          endTime: task.endTime || '',
+          description: task.description || "",
+          date: new Date(task.date).toISOString().split("T")[0],
+          startTime: task.startTime || "",
+          endTime: task.endTime || "",
           tags: task.tags || [],
           categories: task.categories || [],
-          status: task.status || 'pending',
-          projectId: task.projectId || null
-        })
+          status: task.status || "pending",
+          projectId: task.projectId || null,
+        });
       }
     }
-  }, [id, isNewTask])
+  }, [id, isNewTask]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const toggleTag = (tag) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       tags: prev.tags.includes(tag)
-        ? prev.tags.filter(t => t !== tag)
-        : [...prev.tags, tag]
-    }))
-  }
+        ? prev.tags.filter((t) => t !== tag)
+        : [...prev.tags, tag],
+    }));
+  };
 
   const addCustomTag = () => {
     if (newTag.trim() && !formData.tags.includes(newTag.trim())) {
-      setFormData(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }))
-      setNewTag('')
+      setFormData((prev) => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
+      setNewTag("");
     }
-  }
+  };
 
   const toggleCategory = (category) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       categories: prev.categories.includes(category)
-        ? prev.categories.filter(c => c !== category)
-        : [...prev.categories, category]
-    }))
-  }
+        ? prev.categories.filter((c) => c !== category)
+        : [...prev.categories, category],
+    }));
+  };
 
   const addCustomCategory = () => {
-    if (newCategory.trim() && !formData.categories.includes(newCategory.trim())) {
-      setFormData(prev => ({ ...prev, categories: [...prev.categories, newCategory.trim()] }))
-      setNewCategory('')
+    if (
+      newCategory.trim() &&
+      !formData.categories.includes(newCategory.trim())
+    ) {
+      setFormData((prev) => ({
+        ...prev,
+        categories: [...prev.categories, newCategory.trim()],
+      }));
+      setNewCategory("");
     }
-  }
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     const taskData = {
       ...formData,
       date: new Date(formData.date).toISOString(),
-      projectId: formData.projectId ? parseInt(formData.projectId) : null
-    }
+      projectId: formData.projectId ? parseInt(formData.projectId) : null,
+    };
 
     if (isNewTask) {
-      createTask(taskData)
+      createTask(taskData);
     } else {
-      editTask(id, taskData)
+      editTask(id, taskData);
     }
-    navigate('/')
-  }
+    navigate("/");
+  };
 
   const handleDelete = () => {
-    setShowDeleteModal(true)
-  }
+    setShowDeleteModal(true);
+  };
 
   const confirmDelete = () => {
-    removeTask(id)
-    setShowDeleteModal(false)
-    navigate('/')
-  }
+    removeTask(id);
+    setShowDeleteModal(false);
+    navigate("/");
+  };
 
   const cancelDelete = () => {
-    setShowDeleteModal(false)
-  }
+    setShowDeleteModal(false);
+  };
 
   const setStatus = (status) => {
-    setFormData(prev => ({ ...prev, status }))
-  }
+    setFormData((prev) => ({ ...prev, status }));
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <form onSubmit={handleSubmit} className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 lg:p-8 text-white">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 lg:p-8 text-white"
+      >
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
-            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="p-2 hover:bg-white/10 rounded-full"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
               </svg>
             </button>
-            <span className="text-sm opacity-90">{isNewTask ? 'Create Task' : 'Edit Task'}</span>
+            <span className="text-sm opacity-90">
+              {isNewTask ? "Create Task" : "Edit Task"}
+            </span>
             {!isNewTask && (
-              <button type="button" onClick={handleDelete} className="p-2 hover:bg-red-500 rounded-full">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-2 hover:bg-red-500 rounded-full"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
                 </svg>
               </button>
             )}
@@ -167,15 +224,27 @@ const TaskDetailScreen = () => {
               </svg>
               <button
                 type="button"
-                onClick={() => navigate(`/project/${associatedProject.id}/view`)}
+                onClick={() =>
+                  navigate(`/project/${associatedProject.id}/view`)
+                }
                 className="hover:underline"
               >
                 {associatedProject.title}
               </button>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
-              <span>{isNewTask ? 'New Task' : 'Edit Task'}</span>
+              <span>{isNewTask ? "New Task" : "Edit Task"}</span>
             </div>
           )}
         </div>
@@ -209,16 +278,24 @@ const TaskDetailScreen = () => {
             </div>
 
             <div>
-              <label className="text-sm opacity-75 mb-2 block">Project (Optional)</label>
+              <label className="text-sm opacity-75 mb-2 block">
+                Project (Optional)
+              </label>
               <select
                 name="projectId"
-                value={formData.projectId || ''}
+                value={formData.projectId || ""}
                 onChange={handleChange}
                 className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
               >
-                <option value="" className="text-gray-900">No Project</option>
-                {projects.map(project => (
-                  <option key={project.id} value={project.id} className="text-gray-900">
+                <option value="" className="text-gray-900">
+                  No Project
+                </option>
+                {projects.map((project) => (
+                  <option
+                    key={project.id}
+                    value={project.id}
+                    className="text-gray-900"
+                  >
                     {project.name} - {project.title}
                   </option>
                 ))}
@@ -229,7 +306,9 @@ const TaskDetailScreen = () => {
           {/* Time Slots */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm opacity-75 mb-2 block">Start Time</label>
+              <label className="text-sm opacity-75 mb-2 block">
+                Start Time
+              </label>
               <input
                 type="time"
                 name="startTime"
@@ -275,26 +354,33 @@ const TaskDetailScreen = () => {
                 onClick={() => toggleTag(tag)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   formData.tags.includes(tag)
-                    ? 'bg-purple-800 text-white'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? "bg-purple-800 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
                 {tag}
               </button>
             ))}
           </div>
-          {formData.tags.filter(t => !availableTags.includes(t)).map((tag) => (
-            <span key={tag} className="inline-block px-4 py-2 bg-purple-800 rounded-full text-sm font-medium text-white mr-2 mb-2">
-              {tag}
-            </span>
-          ))}
+          {formData.tags
+            .filter((t) => !availableTags.includes(t))
+            .map((tag) => (
+              <span
+                key={tag}
+                className="inline-block px-4 py-2 bg-purple-800 rounded-full text-sm font-medium text-white mr-2 mb-2"
+              >
+                {tag}
+              </span>
+            ))}
           <div className="flex gap-2">
             <input
               type="text"
               value={newTag}
               onChange={(e) => setNewTag(e.target.value)}
               placeholder="Add custom tag"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomTag())}
+              onKeyPress={(e) =>
+                e.key === "Enter" && (e.preventDefault(), addCustomTag())
+              }
               className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
             <button
@@ -318,26 +404,33 @@ const TaskDetailScreen = () => {
                 onClick={() => toggleCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition ${
                   formData.categories.includes(category)
-                    ? 'bg-purple-800 text-white'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                    ? "bg-purple-800 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
                 {category}
               </button>
             ))}
           </div>
-          {formData.categories.filter(c => !availableCategories.includes(c)).map((category) => (
-            <span key={category} className="inline-block px-4 py-2 bg-purple-800 rounded-full text-sm font-medium text-white mr-2 mb-2">
-              {category}
-            </span>
-          ))}
+          {formData.categories
+            .filter((c) => !availableCategories.includes(c))
+            .map((category) => (
+              <span
+                key={category}
+                className="inline-block px-4 py-2 bg-purple-800 rounded-full text-sm font-medium text-white mr-2 mb-2"
+              >
+                {category}
+              </span>
+            ))}
           <div className="flex gap-2">
             <input
               type="text"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               placeholder="Add custom category"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomCategory())}
+              onKeyPress={(e) =>
+                e.key === "Enter" && (e.preventDefault(), addCustomCategory())
+              }
               className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/30"
             />
             <button
@@ -357,25 +450,29 @@ const TaskDetailScreen = () => {
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                onClick={() => setStatus('in_progress')}
+                onClick={() => setStatus("in_progress")}
                 className={`py-3 rounded-xl font-semibold transition ${
-                  formData.status === 'in_progress'
-                    ? 'bg-yellow-500 text-white'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                  formData.status === "in_progress"
+                    ? "bg-yellow-500 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
-                {formData.status === 'in_progress' ? 'In Progress' : 'Mark as In Progress'}
+                {formData.status === "in_progress"
+                  ? "In Progress"
+                  : "Mark as In Progress"}
               </button>
               <button
                 type="button"
-                onClick={() => setStatus('completed')}
+                onClick={() => setStatus("completed")}
                 className={`py-3 rounded-xl font-semibold transition ${
-                  formData.status === 'completed'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-white/20 text-white hover:bg-white/30'
+                  formData.status === "completed"
+                    ? "bg-green-500 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
                 }`}
               >
-                {formData.status === 'completed' ? 'Completed' : 'Mark as Completed'}
+                {formData.status === "completed"
+                  ? "Completed"
+                  : "Mark as Completed"}
               </button>
             </div>
           </div>
@@ -386,7 +483,7 @@ const TaskDetailScreen = () => {
           type="submit"
           className="w-full bg-white text-purple-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition"
         >
-          {isNewTask ? 'Create Task' : 'Update Task'}
+          {isNewTask ? "Create Task" : "Update Task"}
         </button>
       </form>
 
@@ -396,14 +493,27 @@ const TaskDetailScreen = () => {
           <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  className="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
               </div>
             </div>
-            <h3 className="text-xl font-bold text-center mb-2 text-gray-900">Delete Task?</h3>
+            <h3 className="text-xl font-bold text-center mb-2 text-gray-900">
+              Delete Task?
+            </h3>
             <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to delete this task? This action cannot be undone.
+              Are you sure you want to delete this task? This action cannot be
+              undone.
             </p>
             <div className="flex gap-3">
               <button
@@ -425,7 +535,7 @@ const TaskDetailScreen = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default TaskDetailScreen
+export default TaskDetailScreen;

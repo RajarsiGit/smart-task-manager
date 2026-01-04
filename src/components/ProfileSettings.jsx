@@ -1,42 +1,55 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useApp } from "../context/AppContext";
 
 const ProfileSettings = () => {
-  const navigate = useNavigate()
-  const { user, updateUserProfile, clearAllData } = useApp()
-  const [name, setName] = useState(user?.name || '')
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const navigate = useNavigate();
+  const { user, updateUserProfile, clearAllData } = useApp();
+  const [name, setName] = useState(user?.name || "");
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (name.trim()) {
-      updateUserProfile({ name: name.trim() })
-      navigate('/')
+      updateUserProfile({ name: name.trim() });
+      navigate("/");
     }
-  }
+  };
 
   const handleDeleteProfile = () => {
-    setShowDeleteModal(true)
-  }
+    setShowDeleteModal(true);
+  };
 
   const confirmDelete = () => {
-    clearAllData()
-    setShowDeleteModal(false)
-  }
+    clearAllData();
+    setShowDeleteModal(false);
+  };
 
   const cancelDelete = () => {
-    setShowDeleteModal(false)
-  }
+    setShowDeleteModal(false);
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
       <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
-          <button onClick={() => navigate('/')} className="p-2 hover:bg-gray-100 rounded-full">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          <button
+            onClick={() => navigate("/")}
+            className="p-2 hover:bg-gray-100 rounded-full"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
           <h2 className="text-lg font-semibold">Profile Settings</h2>
@@ -47,8 +60,16 @@ const ProfileSettings = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="flex items-center justify-center mb-6">
             <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center">
-              <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+              <svg
+                className="w-10 h-10 text-white"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
           </div>
@@ -77,10 +98,13 @@ const ProfileSettings = () => {
 
         {/* Account Deletion */}
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Account Deletion</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">
+            Account Deletion
+          </h3>
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-sm text-gray-700 mb-3">
-              Deleting your profile will permanently remove all your projects and tasks. This action cannot be undone.
+              Deleting your profile will permanently remove all your projects
+              and tasks. This action cannot be undone.
             </p>
             <button
               type="button"
@@ -99,14 +123,28 @@ const ProfileSettings = () => {
           <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
             <div className="flex items-center justify-center mb-4">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  className="w-8 h-8 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
               </div>
             </div>
-            <h3 className="text-xl font-bold text-center mb-2">Delete Profile?</h3>
+            <h3 className="text-xl font-bold text-center mb-2">
+              Delete Profile?
+            </h3>
             <p className="text-gray-600 text-center mb-6">
-              Are you sure you want to delete your profile? This will permanently remove all your projects and tasks. This action cannot be undone.
+              Are you sure you want to delete your profile? This will
+              permanently remove all your projects and tasks. This action cannot
+              be undone.
             </p>
             <div className="flex gap-3">
               <button
@@ -126,7 +164,7 @@ const ProfileSettings = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProfileSettings
+export default ProfileSettings;
