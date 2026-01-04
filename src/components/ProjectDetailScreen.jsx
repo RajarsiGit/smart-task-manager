@@ -1,14 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { projectsApi, tasksApi } from "../utils/api";
 import LoadingSpinner from "./LoadingSpinner";
 
 const ProjectDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { projects, tasks, removeProject, loading } = useApp();
+  const { projects, tasks, removeProject, loading, setProjects, setTasks } =
+    useApp();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Fetch fresh data from API when component mounts
+  useEffect(() => {
+    const refreshData = async () => {
+      const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
+
+      if (useApi && !loading) {
+        setIsRefreshing(true);
+        try {
+          const [projectsData, tasksData] = await Promise.all([
+            projectsApi.getAll(),
+            tasksApi.getAll(),
+          ]);
+          setProjects(projectsData);
+          setTasks(tasksData);
+        } catch (error) {
+          console.error("Error refreshing data:", error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      }
+    };
+
+    refreshData();
+  }, []); // Only run on mount
 
   const project = projects.find((p) => p.id === Number.parseInt(id));
   const projectTasks = tasks.filter((task) => {
@@ -49,7 +77,7 @@ const ProjectDetailScreen = () => {
     setShowDeleteModal(false);
   };
 
-  if (loading) {
+  if (loading || isRefreshing) {
     return <LoadingSpinner fullScreen />;
   }
 

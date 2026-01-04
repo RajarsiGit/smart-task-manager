@@ -1,15 +1,50 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { tasksApi, projectsApi } from "../utils/api";
 import LoadingSpinner from "./LoadingSpinner";
 
 const CalendarScreen = () => {
   const navigate = useNavigate();
-  const { tasks, projects, selectedDate, setSelectedDate, loading } = useApp();
+  const {
+    tasks,
+    projects,
+    selectedDate,
+    setSelectedDate,
+    loading,
+    setTasks,
+    setProjects,
+  } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDates, setCalendarDates] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const daysOfWeek = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+  // Fetch fresh data from API when component mounts
+  useEffect(() => {
+    const refreshData = async () => {
+      const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
+
+      if (useApi && !loading) {
+        setIsRefreshing(true);
+        try {
+          const [tasksData, projectsData] = await Promise.all([
+            tasksApi.getAll(),
+            projectsApi.getAll(),
+          ]);
+          setTasks(tasksData);
+          setProjects(projectsData);
+        } catch (error) {
+          console.error("Error refreshing data:", error);
+        } finally {
+          setIsRefreshing(false);
+        }
+      }
+    };
+
+    refreshData();
+  }, []); // Only run on mount
 
   useEffect(() => {
     generateCalendar();
@@ -77,7 +112,7 @@ const CalendarScreen = () => {
     return projects.find((p) => p.id === task.projectId);
   };
 
-  if (loading) {
+  if (loading || isRefreshing) {
     return <LoadingSpinner fullScreen />;
   }
 

@@ -7,6 +7,7 @@ import CreateProject from "./components/CreateProject";
 import ProjectDetailScreen from "./components/ProjectDetailScreen";
 import AuthScreen from "./components/AuthScreen";
 import ProfileSettings from "./components/ProfileSettings";
+import LoadingSpinner from "./components/LoadingSpinner";
 
 function AppContent() {
   const { user, loadData, loading } = useApp();
@@ -16,14 +17,14 @@ function AppContent() {
     await loadData();
   };
 
-  // Show auth screen if not authenticated
-  if (!user && !loading) {
-    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+  // Show loader while checking authentication
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
   }
 
-  // Show nothing while loading
-  if (loading) {
-    return null;
+  // Show auth screen if not authenticated
+  if (!user) {
+    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
   }
 
   return (
