@@ -14,6 +14,8 @@ A beautiful and functional task management application built with React, Vite, a
   - Create, edit, and delete projects
   - Customize project colors with 6 gradient themes
   - View all projects on the home screen
+  - Detailed project view with associated tasks
+  - Breadcrumb navigation for better context
 
 - **Task Management**
   - Create, edit, and delete tasks
@@ -22,6 +24,8 @@ A beautiful and functional task management application built with React, Vite, a
   - Assign tasks to projects
   - Mark tasks as completed
   - Filter tasks by status (All, In Progress, Completed)
+  - View project context on task tiles
+  - Breadcrumb navigation when creating tasks from projects
 
 - **Calendar View**
   - Interactive calendar with month navigation
@@ -40,6 +44,16 @@ A beautiful and functional task management application built with React, Vite, a
   - Delete profile option to clear all data
   - Two-step confirmation to prevent accidental deletion
   - Complete data reset returns to welcome screen
+
+- **Accessibility & SEO**
+  - Full WCAG compliance with proper ARIA labels
+  - Semantic HTML throughout the application
+  - All form labels properly associated with controls
+  - Keyboard navigation support
+  - Progressive Web App (PWA) ready with manifest
+  - Comprehensive meta tags for SEO
+  - Open Graph and Twitter Card support for social sharing
+  - Custom favicon representing task management
 
 ## Getting Started
 
@@ -136,17 +150,23 @@ Access your profile settings by clicking the profile icon in the home screen hea
 ```
 src/
 ├── components/
-│   ├── HomeScreen.jsx          # Main dashboard
-│   ├── CalendarScreen.jsx      # Calendar view
-│   ├── TaskDetailScreen.jsx    # Task create/edit form
-│   └── CreateProject.jsx       # Project create/edit form
+│   ├── HomeScreen.jsx           # Main dashboard
+│   ├── CalendarScreen.jsx       # Calendar view
+│   ├── TaskDetailScreen.jsx     # Task create/edit form
+│   ├── CreateProject.jsx        # Project create/edit form
+│   ├── ProjectDetailScreen.jsx  # Project detail view
+│   ├── ProfileSettings.jsx      # User profile settings
+│   └── WelcomeScreen.jsx        # First-time setup screen
 ├── context/
-│   └── AppContext.jsx          # Global state management
+│   └── AppContext.jsx           # Global state management
 ├── utils/
-│   └── localStorage.js         # localStorage utilities
-├── App.jsx                     # Main app component
-├── main.jsx                    # App entry point
-└── index.css                   # Global styles
+│   └── localStorage.js          # localStorage utilities
+├── App.jsx                      # Main app component
+├── main.jsx                     # App entry point
+└── index.css                    # Global styles
+public/
+├── favicon.svg                  # Custom app icon
+└── manifest.json                # PWA manifest
 ```
 
 ## License

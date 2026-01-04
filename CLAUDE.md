@@ -73,10 +73,11 @@ App (AppProvider wrapper)
       └─ Router (if user exists)
           ├─ / → HomeScreen
           ├─ /calendar → CalendarScreen
-          ├─ /task/new → TaskDetailScreen (create mode)
+          ├─ /task/new → TaskDetailScreen (create mode, supports ?projectId query param)
           ├─ /task/:id → TaskDetailScreen (edit mode)
           ├─ /project/new → CreateProject (create mode)
           ├─ /project/:id → CreateProject (edit mode)
+          ├─ /project/:id/view → ProjectDetailScreen (view mode with task list)
           └─ /profile → ProfileSettings
 ```
 
@@ -101,6 +102,12 @@ Both `TaskDetailScreen` and `CreateProject` use the same pattern:
 3. **IMPORTANT**: `projectId` from select dropdowns must be converted to number via `parseInt()` or set to `null`
 4. On submit, call context method (createTask/editTask) then navigate away
 
+**Breadcrumb Navigation**:
+- TaskDetailScreen accepts `?projectId=X` query parameter for context
+- When present, displays breadcrumb showing the project title
+- Clicking breadcrumb navigates to `/project/:id/view`
+- This provides better UX when creating tasks from project detail screens
+
 ### Calendar Implementation
 
 `CalendarScreen.jsx` dynamically generates calendar dates:
@@ -114,6 +121,42 @@ Both `TaskDetailScreen` and `CreateProject` use the same pattern:
 - Tailwind utility classes for all styling
 - Custom animation in `index.css`: `animate-fadeIn` for welcome screen
 - Project cards use dynamic gradient classes stored as strings (e.g., `'bg-gradient-to-br from-purple-600 to-purple-700'`)
+
+### Accessibility Guidelines
+
+**CRITICAL - Always follow these accessibility patterns:**
+
+1. **Form Labels**: All form inputs MUST have associated labels
+   - Use `htmlFor` attribute matching the input's `id`
+   - Example: `<label htmlFor="task-title">Title</label>` with `<input id="task-title" />`
+
+2. **Button Groups**: When labeling groups of buttons (not single inputs)
+   - Use `role="group"` on the container div
+   - Use `aria-labelledby` pointing to a span with unique id
+   - Example:
+   ```jsx
+   <div role="group" aria-labelledby="tags-label">
+     <span id="tags-label" className="...">Tags</span>
+     <div className="flex gap-2">
+       <button>Tag 1</button>
+       <button>Tag 2</button>
+     </div>
+   </div>
+   ```
+
+3. **Interactive Elements**: Always use semantic HTML
+   - Use `<button type="button">` for clickable elements, NOT `<div role="button">`
+   - Add `w-full text-left` classes to buttons that need div-like layout
+   - Never use `tabIndex` and keyboard handlers on divs - use actual buttons
+
+4. **React Keys**: Never use array index in keys
+   - Use unique IDs from data (e.g., `task.id`, `project.id`)
+   - For generated data without IDs, create unique identifiers
+   - Example: Calendar dates use `id: ${year}-${month}-${day}` instead of index
+
+5. **ARIA Labels**: Use for elements without visible text
+   - `aria-label` on buttons with only icons
+   - Example: `<button aria-label="Delete project">🗑️</button>`
 
 ## Common Pitfalls
 
@@ -129,9 +172,36 @@ Both `TaskDetailScreen` and `CreateProject` use the same pattern:
 
 6. **Responsive Breakpoints**: Desktop features kick in at `lg` (1024px). Don't use `md` for desktop layouts - components specifically use lg:block/lg:hidden pattern.
 
+7. **"new" Route Parameter**: When checking if editing an existing entity, use `if (id && id !== 'new')`. The string "new" is used for create routes and is truthy, so checking just `if (id)` will incorrectly trigger edit mode.
+
+8. **State Updates with Closures**: Always use functional updates for state that depends on previous state. Use `setState(prev => ...)` instead of `setState(state)` to avoid stale closure issues.
+   - Bad: `setProjects([...projects, newProject])`
+   - Good: `setProjects(prev => [...prev, newProject])`
+
+9. **Accessibility Violations**: Never skip accessibility requirements
+   - All labels must be associated (htmlFor or aria-labelledby)
+   - Use semantic HTML (`<button>` not `<div role="button">`)
+   - Never use array indices as React keys
+
 ## Data Persistence Notes
 
 - All data is stored client-side only - no server, no database
 - localStorage has ~5-10MB limit (plenty for this use case)
 - Clearing browser data or using incognito will lose all data
 - The "Delete Profile" feature in ProfileSettings clears ALL data and returns to welcome screen
+
+## PWA & SEO
+
+The app is configured as a Progressive Web App:
+- `public/manifest.json` defines app metadata, icons, and shortcuts
+- `public/favicon.svg` provides a custom purple gradient checklist icon
+- `index.html` includes comprehensive meta tags:
+  - SEO optimization (description, keywords, author)
+  - Open Graph tags for Facebook sharing
+  - Twitter Card tags for Twitter sharing
+  - Theme color and viewport settings
+  - PWA manifest link
+
+App shortcuts in manifest:
+- "New Task" → `/task/new`
+- "Calendar" → `/calendar`
