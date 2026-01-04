@@ -6,12 +6,22 @@ import LoadingSpinner from "./LoadingSpinner";
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { projects, tasks, user, removeProject, loading, setProjects, setTasks } = useApp();
+  const {
+    projects,
+    tasks,
+    user,
+    removeProject,
+    loading,
+    setProjects,
+    setTasks,
+    logout,
+  } = useApp();
   const [activeTab, setActiveTab] = useState("all");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Fetch fresh data from API when component mounts
   useEffect(() => {
@@ -98,13 +108,25 @@ const HomeScreen = () => {
     navigate(`/project/${projectId}`);
   };
 
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Error logging out:", error);
+      alert("Failed to logout. Please try again.");
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   if (loading || isRefreshing) {
     return <LoadingSpinner fullScreen />;
   }
 
   return (
     <>
-      {isDeleting && <LoadingSpinner fullScreen />}
+      {(isDeleting || isLoggingOut) && <LoadingSpinner fullScreen />}
       <div className="w-full max-w-7xl mx-auto">
         {/* Desktop Layout */}
         <div className="hidden lg:block">
@@ -151,6 +173,7 @@ const HomeScreen = () => {
                 <button
                   className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200"
                   onClick={() => navigate("/profile")}
+                  title="Profile"
                 >
                   <svg
                     className="w-6 h-6"
@@ -161,6 +184,25 @@ const HomeScreen = () => {
                       fillRule="evenodd"
                       d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                       clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+                <button
+                  className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100"
+                  onClick={handleLogout}
+                  title="Logout"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                     />
                   </svg>
                 </button>
@@ -407,6 +449,7 @@ const HomeScreen = () => {
               <button
                 className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
                 onClick={() => navigate("/profile")}
+                title="Profile"
               >
                 <svg
                   className="w-6 h-6"
@@ -417,6 +460,25 @@ const HomeScreen = () => {
                     fillRule="evenodd"
                     d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
                     clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+              <button
+                className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100"
+                onClick={handleLogout}
+                title="Logout"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
                   />
                 </svg>
               </button>

@@ -30,13 +30,10 @@ export default async function handler(req, res) {
   } else if (req.url) {
     // Parse from URL for dev server
     const urlMatch = req.url.match(/\/api\/auth\/?(.*)$/);
-    if (urlMatch && urlMatch[1]) {
-      path = urlMatch[1].split('?')[0];
+    if (urlMatch?.[1]) {
+      path = urlMatch[1].split("?")[0];
     }
   }
-
-  // Debug logging
-  console.log("Auth API - Method:", req.method, "Path:", path, "URL:", req.url, "Query:", req.query);
 
   try {
     // POST /api/auth - Register new user
