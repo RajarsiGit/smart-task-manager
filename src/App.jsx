@@ -1,22 +1,22 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import { AppProvider, useApp } from './context/AppContext'
-import HomeScreen from './components/HomeScreen'
-import CalendarScreen from './components/CalendarScreen'
-import TaskDetailScreen from './components/TaskDetailScreen'
-import CreateProject from './components/CreateProject'
-import ProjectDetailScreen from './components/ProjectDetailScreen'
-import WelcomeScreen from './components/WelcomeScreen'
-import ProfileSettings from './components/ProfileSettings'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AppProvider, useApp } from "./context/AppContext";
+import HomeScreen from "./components/HomeScreen";
+import CalendarScreen from "./components/CalendarScreen";
+import TaskDetailScreen from "./components/TaskDetailScreen";
+import CreateProject from "./components/CreateProject";
+import ProjectDetailScreen from "./components/ProjectDetailScreen";
+import WelcomeScreen from "./components/WelcomeScreen";
+import ProfileSettings from "./components/ProfileSettings";
 
 function AppContent() {
-  const { user, updateUserProfile } = useApp()
+  const { user, updateUserProfile } = useApp();
 
   const handleWelcomeComplete = (name) => {
-    updateUserProfile({ name })
-  }
+    updateUserProfile({ name });
+  };
 
   if (!user) {
-    return <WelcomeScreen onComplete={handleWelcomeComplete} />
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
   }
 
   return (
@@ -32,7 +32,7 @@ function AppContent() {
         </Routes>
       </div>
     </Router>
-  )
+  );
 }
 
 function App() {
@@ -40,7 +40,7 @@ function App() {
     <AppProvider>
       <AppContent />
     </AppProvider>
-  )
+  );
 }
 
-export default App
+export default App;
