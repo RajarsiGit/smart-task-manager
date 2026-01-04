@@ -13,7 +13,7 @@ const ProfileSettings = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Fetch fresh user data from API when component mounts
   useEffect(() => {
@@ -44,6 +44,7 @@ const ProfileSettings = () => {
           setName(user.name || "");
           setEmail(user.email || "");
         }
+        setIsLoading(false);
       }
     };
 
@@ -99,9 +100,14 @@ const ProfileSettings = () => {
     }
   };
 
+  // Show only loader while fetching initial data
+  if (isLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
   return (
     <>
-      {(isSaving || isDeleting || isLoggingOut || isLoading) && (
+      {(isSaving || isDeleting || isLoggingOut) && (
         <LoadingSpinner fullScreen />
       )}
       <div className="w-full max-w-2xl mx-auto">
