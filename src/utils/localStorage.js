@@ -67,7 +67,7 @@ export const getTasks = () => {
 
 export const getTaskById = (id) => {
   const tasks = getTasks();
-  return tasks.find((t) => t.id === parseInt(id));
+  return tasks.find((t) => t.id === Number.parseInt(id));
 };
 
 export const getTasksByDate = (date) => {
@@ -99,7 +99,7 @@ export const addTask = (task) => {
 
 export const updateTask = (id, updates) => {
   const tasks = getTasks();
-  const index = tasks.findIndex((t) => t.id === parseInt(id));
+  const index = tasks.findIndex((t) => t.id === Number.parseInt(id));
   if (index !== -1) {
     tasks[index] = { ...tasks[index], ...updates };
     localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));
@@ -110,7 +110,7 @@ export const updateTask = (id, updates) => {
 
 export const deleteTask = (id) => {
   const tasks = getTasks();
-  const filtered = tasks.filter((t) => t.id !== parseInt(id));
+  const filtered = tasks.filter((t) => t.id !== Number.parseInt(id));
   localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(filtered));
 };
 

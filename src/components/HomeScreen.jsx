@@ -6,7 +6,6 @@ const HomeScreen = () => {
   const navigate = useNavigate();
   const { projects, tasks, user, removeProject } = useApp();
   const [activeTab, setActiveTab] = useState("all");
-  const [editingProject, setEditingProject] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
 
@@ -26,6 +25,11 @@ const HomeScreen = () => {
     });
   };
 
+  const getTaskProject = (task) => {
+    if (!task.projectId) return null;
+    return projects.find((p) => p.id === task.projectId);
+  };
+
   const handleDeleteProject = (e, projectId) => {
     e.stopPropagation();
     setProjectToDelete(projectId);
@@ -43,6 +47,12 @@ const HomeScreen = () => {
   const cancelDelete = () => {
     setShowDeleteModal(false);
     setProjectToDelete(null);
+  };
+
+  const getTaskSectionTitle = () => {
+    if (activeTab === "all") return "All Tasks";
+    if (activeTab === "progress") return "In Progress";
+    return "Completed";
   };
 
   const handleEditProject = (e, projectId) => {
@@ -129,10 +139,12 @@ const HomeScreen = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {projects.map((project) => (
-                  <div
+                  <button
                     key={project.id}
-                    className={`${project.color} rounded-2xl p-6 text-white cursor-pointer transform transition hover:scale-105 relative group`}
+                    type="button"
+                    className={`${project.color} rounded-2xl p-6 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
                     onClick={() => navigate(`/project/${project.id}/view`)}
+                    aria-label={`View ${project.title} project`}
                   >
                     <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                       <button
@@ -190,7 +202,7 @@ const HomeScreen = () => {
                     <p className="text-sm opacity-80">
                       {formatDate(project.date)}
                     </p>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -240,48 +252,63 @@ const HomeScreen = () => {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredTasks.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition"
-                    onClick={() => navigate(`/task/${task.id}`)}
-                  >
-                    <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <svg
-                        className="w-6 h-6 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-gray-700 font-medium block truncate">
-                        {task.title}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {formatDate(task.date)}
-                      </span>
-                    </div>
-                    {task.status === "completed" && (
-                      <svg
-                        className="w-6 h-6 text-green-500 flex-shrink-0"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                ))}
+                {filteredTasks.map((task) => {
+                  const project = getTaskProject(task);
+                  return (
+                    <button
+                      key={task.id}
+                      type="button"
+                      className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition w-full text-left"
+                      onClick={() => navigate(`/task/${task.id}`)}
+                      aria-label={`View task: ${task.title}`}
+                    >
+                      <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg
+                          className="w-6 h-6 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-gray-700 font-medium block truncate">
+                          {task.title}
+                        </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs text-gray-400">
+                            {formatDate(task.date)}
+                          </span>
+                          {project && (
+                            <>
+                              <span className="text-xs text-gray-300">•</span>
+                              <span className="text-xs text-purple-600 font-medium">
+                                {project.title}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {task.status === "completed" && (
+                        <svg
+                          className="w-6 h-6 text-green-500 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -395,10 +422,12 @@ const HomeScreen = () => {
               </div>
             ) : (
               projects.map((project) => (
-                <div
+                <button
                   key={project.id}
-                  className={`${project.color} rounded-2xl p-5 text-white cursor-pointer transform transition hover:scale-105 relative group`}
+                  type="button"
+                  className={`${project.color} rounded-2xl p-5 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
                   onClick={() => navigate(`/project/${project.id}/view`)}
+                  aria-label={`View ${project.title} project`}
                 >
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
                     <button
@@ -456,7 +485,7 @@ const HomeScreen = () => {
                   <p className="text-sm opacity-80">
                     {formatDate(project.date)}
                   </p>
-                </div>
+                </button>
               ))
             )}
           </div>
@@ -475,13 +504,7 @@ const HomeScreen = () => {
         {/* Tasks Section */}
         <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-bold">
-              {activeTab === "all"
-                ? "All Tasks"
-                : activeTab === "progress"
-                ? "In Progress"
-                : "Completed"}
-            </h2>
+            <h2 className="text-lg font-bold">{getTaskSectionTitle()}</h2>
             <button
               onClick={() => navigate("/task/new")}
               className="bg-purple-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-purple-700 transition"
@@ -493,48 +516,63 @@ const HomeScreen = () => {
             {filteredTasks.length === 0 ? (
               <p className="text-gray-400 text-center py-4">No tasks found</p>
             ) : (
-              filteredTasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition"
-                  onClick={() => navigate(`/task/${task.id}`)}
-                >
-                  <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg
-                      className="w-5 h-5 text-white"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <span className="text-gray-700 font-medium block">
-                      {task.title}
-                    </span>
-                    <span className="text-xs text-gray-400">
-                      {formatDate(task.date)}
-                    </span>
-                  </div>
-                  {task.status === "completed" && (
-                    <svg
-                      className="w-5 h-5 text-green-500"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
-                </div>
-              ))
+              filteredTasks.map((task) => {
+                const project = getTaskProject(task);
+                return (
+                  <button
+                    key={task.id}
+                    type="button"
+                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition w-full text-left"
+                    onClick={() => navigate(`/task/${task.id}`)}
+                    aria-label={`View task: ${task.title}`}
+                  >
+                    <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <svg
+                        className="w-5 h-5 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-gray-700 font-medium block truncate">
+                        {task.title}
+                      </span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-xs text-gray-400">
+                          {formatDate(task.date)}
+                        </span>
+                        {project && (
+                          <>
+                            <span className="text-xs text-gray-300">•</span>
+                            <span className="text-xs text-purple-600 font-medium truncate">
+                              {project.title}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    {task.status === "completed" && (
+                      <svg
+                        className="w-5 h-5 text-green-500 flex-shrink-0"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </button>
+                );
+              })
             )}
           </div>
         </div>

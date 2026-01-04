@@ -4,7 +4,7 @@ import { useApp } from "../context/AppContext";
 
 const CalendarScreen = () => {
   const navigate = useNavigate();
-  const { tasks, selectedDate, setSelectedDate } = useApp();
+  const { tasks, projects, selectedDate, setSelectedDate } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDates, setCalendarDates] = useState([]);
 
@@ -31,7 +31,7 @@ const CalendarScreen = () => {
 
     // Add empty cells for days before month starts
     for (let i = 0; i < firstDayOfWeek; i++) {
-      dates.push({ date: null, day: "" });
+      dates.push({ id: `empty-${i}`, date: null, day: "" });
     }
 
     // Add actual dates
@@ -39,6 +39,7 @@ const CalendarScreen = () => {
       const date = new Date(year, month, day);
       const dayOfWeek = date.toLocaleDateString("en-US", { weekday: "short" });
       dates.push({
+        id: `${year}-${month}-${day}`,
         date: day,
         day: dayOfWeek.substring(0, 2),
         fullDate: date,
@@ -69,6 +70,11 @@ const CalendarScreen = () => {
       taskDate.getFullYear() === currentDate.getFullYear()
     );
   }).length;
+
+  const getTaskProject = (task) => {
+    if (!task.projectId) return null;
+    return projects.find((p) => p.id === task.projectId);
+  };
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -181,8 +187,8 @@ const CalendarScreen = () => {
 
             {/* Dates */}
             <div className="grid grid-cols-7 gap-2">
-              {calendarDates.map((item, index) => (
-                <div key={index} className="aspect-square">
+              {calendarDates.map((item) => (
+                <div key={item.id} className="aspect-square">
                   {item.date && (
                     <button
                       onClick={() => setSelectedDate(item.fullDate)}
@@ -234,50 +240,67 @@ const CalendarScreen = () => {
                   </button>
                 </div>
               ) : (
-                tasksForDate.map((task) => (
-                  <div
-                    key={task.id}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition"
-                    onClick={() => navigate(`/task/${task.id}`)}
-                  >
-                    <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <svg
-                        className="w-5 h-5 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <span className="text-gray-700 font-medium block">
-                        {task.title}
-                      </span>
-                      {task.startTime && task.endTime && (
-                        <span className="text-xs text-gray-400">
-                          {task.startTime} - {task.endTime}
+                tasksForDate.map((task) => {
+                  const project = getTaskProject(task);
+                  return (
+                    <button
+                      key={task.id}
+                      type="button"
+                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition w-full text-left"
+                      onClick={() => navigate(`/task/${task.id}`)}
+                      aria-label={`View task: ${task.title}`}
+                    >
+                      <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <svg
+                          className="w-5 h-5 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-gray-700 font-medium block truncate">
+                          {task.title}
                         </span>
+                        <div className="flex items-center gap-2 mt-1">
+                          {task.startTime && task.endTime && (
+                            <span className="text-xs text-gray-400">
+                              {task.startTime} - {task.endTime}
+                            </span>
+                          )}
+                          {project && (
+                            <>
+                              {task.startTime && task.endTime && (
+                                <span className="text-xs text-gray-300">•</span>
+                              )}
+                              <span className="text-xs text-purple-600 font-medium truncate">
+                                {project.title}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      {task.status === "completed" && (
+                        <svg
+                          className="w-5 h-5 text-green-500 flex-shrink-0"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
                       )}
-                    </div>
-                    {task.status === "completed" && (
-                      <svg
-                        className="w-5 h-5 text-green-500"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                ))
+                    </button>
+                  );
+                })
               )}
             </div>
           </div>

@@ -31,7 +31,7 @@ const TaskDetailScreen = () => {
     tags: [],
     categories: [],
     status: "in_progress",
-    projectId: projectIdFromQuery ? parseInt(projectIdFromQuery) : null,
+    projectId: projectIdFromQuery ? Number.parseInt(projectIdFromQuery) : null,
   });
 
   const [newTag, setNewTag] = useState("");
@@ -41,7 +41,7 @@ const TaskDetailScreen = () => {
   // Get the project associated with this task (either from query param or from task data)
   const getAssociatedProject = () => {
     const projectId = projectIdFromQuery
-      ? parseInt(projectIdFromQuery)
+      ? Number.parseInt(projectIdFromQuery)
       : formData.projectId;
     return projectId ? projects.find((p) => p.id === projectId) : null;
   };
@@ -132,7 +132,9 @@ const TaskDetailScreen = () => {
     const taskData = {
       ...formData,
       date: new Date(formData.date).toISOString(),
-      projectId: formData.projectId ? parseInt(formData.projectId) : null,
+      projectId: formData.projectId
+        ? Number.parseInt(formData.projectId)
+        : null,
     };
 
     if (isNewTask) {
@@ -252,8 +254,14 @@ const TaskDetailScreen = () => {
         {/* Task Info */}
         <div className="mb-6 space-y-4">
           <div>
-            <label className="text-sm opacity-75 mb-2 block">Task Name</label>
+            <label
+              htmlFor="task-title"
+              className="text-sm opacity-75 mb-2 block"
+            >
+              Task Name
+            </label>
             <input
+              id="task-title"
               type="text"
               name="title"
               value={formData.title}
@@ -266,8 +274,14 @@ const TaskDetailScreen = () => {
 
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-sm opacity-75 mb-2 block">Date</label>
+              <label
+                htmlFor="task-date"
+                className="text-sm opacity-75 mb-2 block"
+              >
+                Date
+              </label>
               <input
+                id="task-date"
                 type="date"
                 name="date"
                 value={formData.date}
@@ -278,10 +292,14 @@ const TaskDetailScreen = () => {
             </div>
 
             <div>
-              <label className="text-sm opacity-75 mb-2 block">
+              <label
+                htmlFor="task-project"
+                className="text-sm opacity-75 mb-2 block"
+              >
                 Project (Optional)
               </label>
               <select
+                id="task-project"
                 name="projectId"
                 value={formData.projectId || ""}
                 onChange={handleChange}
@@ -306,10 +324,14 @@ const TaskDetailScreen = () => {
           {/* Time Slots */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm opacity-75 mb-2 block">
+              <label
+                htmlFor="task-start-time"
+                className="text-sm opacity-75 mb-2 block"
+              >
                 Start Time
               </label>
               <input
+                id="task-start-time"
                 type="time"
                 name="startTime"
                 value={formData.startTime}
@@ -318,8 +340,14 @@ const TaskDetailScreen = () => {
               />
             </div>
             <div>
-              <label className="text-sm opacity-75 mb-2 block">End Time</label>
+              <label
+                htmlFor="task-end-time"
+                className="text-sm opacity-75 mb-2 block"
+              >
+                End Time
+              </label>
               <input
+                id="task-end-time"
                 type="time"
                 name="endTime"
                 value={formData.endTime}
@@ -332,8 +360,14 @@ const TaskDetailScreen = () => {
 
         {/* Description */}
         <div className="mb-6">
-          <label className="text-sm opacity-75 mb-2 block">Description</label>
+          <label
+            htmlFor="task-description"
+            className="text-sm opacity-75 mb-2 block"
+          >
+            Description
+          </label>
           <textarea
+            id="task-description"
             name="description"
             value={formData.description}
             onChange={handleChange}
@@ -344,8 +378,10 @@ const TaskDetailScreen = () => {
         </div>
 
         {/* Tags */}
-        <div className="mb-4">
-          <label className="text-sm opacity-75 mb-2 block">Tags</label>
+        <div className="mb-4" role="group" aria-labelledby="tags-label">
+          <span id="tags-label" className="text-sm opacity-75 mb-2 block">
+            Tags
+          </span>
           <div className="flex flex-wrap gap-2 mb-3">
             {availableTags.map((tag) => (
               <button
@@ -394,8 +430,10 @@ const TaskDetailScreen = () => {
         </div>
 
         {/* Categories */}
-        <div className="mb-6">
-          <label className="text-sm opacity-75 mb-2 block">Categories</label>
+        <div className="mb-6" role="group" aria-labelledby="categories-label">
+          <span id="categories-label" className="text-sm opacity-75 mb-2 block">
+            Categories
+          </span>
           <div className="flex flex-wrap gap-2 mb-3">
             {availableCategories.map((category) => (
               <button
@@ -445,8 +483,10 @@ const TaskDetailScreen = () => {
 
         {/* Status Buttons */}
         {!isNewTask && (
-          <div className="mb-6">
-            <label className="text-sm opacity-75 mb-2 block">Status</label>
+          <div className="mb-6" role="group" aria-labelledby="status-label">
+            <span id="status-label" className="text-sm opacity-75 mb-2 block">
+              Status
+            </span>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"

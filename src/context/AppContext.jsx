@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useMemo } from "react";
+import PropTypes from "prop-types";
 import * as storage from "../utils/localStorage";
 
 const AppContext = createContext();
@@ -59,7 +60,7 @@ export const AppProvider = ({ children }) => {
     const updated = storage.updateTask(id, updates);
     if (updated) {
       setTasks((prev) =>
-        prev.map((t) => (t.id === parseInt(id) ? updated : t))
+        prev.map((t) => (t.id === Number.parseInt(id) ? updated : t))
       );
     }
     return updated;
@@ -67,7 +68,7 @@ export const AppProvider = ({ children }) => {
 
   const removeTask = (id) => {
     storage.deleteTask(id);
-    setTasks((prev) => prev.filter((t) => t.id !== parseInt(id)));
+    setTasks((prev) => prev.filter((t) => t.id !== Number.parseInt(id)));
   };
 
   const getTasksByDate = (date) => {
@@ -91,24 +92,31 @@ export const AppProvider = ({ children }) => {
     setUser(null);
   };
 
-  const value = {
-    projects,
-    tasks,
-    user,
-    selectedDate,
-    setSelectedDate,
-    createProject,
-    editProject,
-    removeProject,
-    createTask,
-    editTask,
-    removeTask,
-    getTasksByDate,
-    getTasksByProject,
-    updateUserProfile,
-    clearAllData,
-    loadData,
-  };
+  const value = useMemo(
+    () => ({
+      projects,
+      tasks,
+      user,
+      selectedDate,
+      setSelectedDate,
+      createProject,
+      editProject,
+      removeProject,
+      createTask,
+      editTask,
+      removeTask,
+      getTasksByDate,
+      getTasksByProject,
+      updateUserProfile,
+      clearAllData,
+      loadData,
+    }),
+    [projects, tasks, user, selectedDate]
+  );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+};
+
+AppProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

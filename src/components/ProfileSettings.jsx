@@ -75,10 +75,14 @@ const ProfileSettings = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="user-name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Your Name
             </label>
             <input
+              id="user-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}

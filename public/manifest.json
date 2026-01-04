@@ -1,0 +1,47 @@
+{
+  "name": "Smart Task Manager",
+  "short_name": "Task Manager",
+  "description": "A beautiful, intuitive task management app with project organization and calendar views",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#8B5CF6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "New Task",
+      "short_name": "New Task",
+      "description": "Create a new task",
+      "url": "/task/new",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Calendar",
+      "short_name": "Calendar",
+      "description": "View calendar",
+      "url": "/calendar",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}

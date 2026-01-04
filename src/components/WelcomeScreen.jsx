@@ -37,10 +37,14 @@ const WelcomeScreen = ({ onComplete }) => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="welcome-name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               What's your name?
             </label>
             <input
+              id="welcome-name"
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}

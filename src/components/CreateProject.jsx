@@ -33,7 +33,7 @@ const CreateProject = () => {
 
   useEffect(() => {
     if (id && id !== "new") {
-      const project = projects.find((p) => p.id === parseInt(id));
+      const project = projects.find((p) => p.id === Number.parseInt(id));
       if (project) {
         setFormData({
           name: project.name,
@@ -47,7 +47,7 @@ const CreateProject = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (id && id !== "new") {
-      editProject(parseInt(id), formData);
+      editProject(Number.parseInt(id), formData);
     } else {
       createProject(formData);
     }
@@ -86,10 +86,14 @@ const CreateProject = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="project-name"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Project Name
             </label>
             <input
+              id="project-name"
               type="text"
               name="name"
               value={formData.name}
@@ -101,10 +105,14 @@ const CreateProject = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="project-title"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Project Title
             </label>
             <input
+              id="project-title"
               type="text"
               name="title"
               value={formData.title}
@@ -115,10 +123,13 @@ const CreateProject = () => {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">
+          <div role="group" aria-labelledby="color-theme-label">
+            <span
+              id="color-theme-label"
+              className="block text-sm font-medium text-gray-700 mb-3"
+            >
               Color Theme
-            </label>
+            </span>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
               {colorOptions.map((option) => (
                 <button

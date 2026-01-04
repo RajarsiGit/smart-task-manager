@@ -8,13 +8,13 @@ const ProjectDetailScreen = () => {
   const { projects, tasks, removeProject } = useApp();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
-  const project = projects.find((p) => p.id === parseInt(id));
+  const project = projects.find((p) => p.id === Number.parseInt(id));
   const projectTasks = tasks.filter((task) => {
     const taskProjectId =
       typeof task.projectId === "string"
-        ? parseInt(task.projectId)
+        ? Number.parseInt(task.projectId)
         : task.projectId;
-    return taskProjectId === parseInt(id);
+    return taskProjectId === Number.parseInt(id);
   });
 
   const formatDate = (dateString) => {
@@ -31,7 +31,7 @@ const ProjectDetailScreen = () => {
   };
 
   const confirmDelete = () => {
-    removeProject(parseInt(id));
+    removeProject(Number.parseInt(id));
     setShowDeleteModal(false);
     navigate("/");
   };
@@ -165,10 +165,12 @@ const ProjectDetailScreen = () => {
               </div>
             ) : (
               projectTasks.map((task) => (
-                <div
+                <button
                   key={task.id}
-                  className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition"
+                  type="button"
+                  className="flex items-center gap-4 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition w-full text-left"
                   onClick={() => navigate(`/task/${task.id}`)}
+                  aria-label={`View task: ${task.title}`}
                 >
                   <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
                     <svg
@@ -202,9 +204,9 @@ const ProjectDetailScreen = () => {
                     </div>
                     {task.tags && task.tags.length > 0 && (
                       <div className="flex gap-1 mt-2 flex-wrap">
-                        {task.tags.map((tag, index) => (
+                        {task.tags.map((tag) => (
                           <span
-                            key={index}
+                            key={tag}
                             className="px-2 py-1 bg-purple-100 text-purple-600 rounded-full text-xs"
                           >
                             {tag}
@@ -226,7 +228,7 @@ const ProjectDetailScreen = () => {
                       />
                     </svg>
                   )}
-                </div>
+                </button>
               ))
             )}
           </div>
