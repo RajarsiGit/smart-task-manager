@@ -40,11 +40,13 @@ const ProjectDetailScreen = () => {
 
   const project = projects.find((p) => p.id === Number.parseInt(id));
   const projectTasks = tasks.filter((task) => {
-    const taskProjectId =
-      typeof task.projectId === "string"
-        ? Number.parseInt(task.projectId)
-        : task.projectId;
-    return taskProjectId === Number.parseInt(id);
+    // Handle both camelCase (projectId) and snake_case (project_id) from API
+    const taskProjectId = task.projectId || task.project_id;
+    const normalizedTaskProjectId =
+      typeof taskProjectId === "string"
+        ? Number.parseInt(taskProjectId)
+        : taskProjectId;
+    return normalizedTaskProjectId === Number.parseInt(id);
   });
 
   const formatDate = (dateString) => {

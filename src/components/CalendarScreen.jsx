@@ -18,37 +18,56 @@ const CalendarScreen = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDates, setCalendarDates] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFetchingDateTasks, setIsFetchingDateTasks] = useState(false);
+  const [isFetchingMonth, setIsFetchingMonth] = useState(false);
 
   const daysOfWeek = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
-
-  // Fetch fresh data from API when component mounts
-  useEffect(() => {
-    const refreshData = async () => {
-      const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
-
-      if (useApi && !loading) {
-        setIsRefreshing(true);
-        try {
-          const [tasksData, projectsData] = await Promise.all([
-            tasksApi.getAll(),
-            projectsApi.getAll(),
-          ]);
-          setTasks(tasksData);
-          setProjects(projectsData);
-        } catch (error) {
-          console.error("Error refreshing data:", error);
-        } finally {
-          setIsRefreshing(false);
-        }
-      }
-    };
-
-    refreshData();
-  }, []); // Only run on mount
 
   useEffect(() => {
     generateCalendar();
   }, [currentDate]);
+
+  // Fetch tasks when selected date changes
+  useEffect(() => {
+    const fetchTasksForDate = async () => {
+      const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
+
+      if (useApi && !loading) {
+        setIsFetchingDateTasks(true);
+        try {
+          const tasksData = await tasksApi.getAll();
+          setTasks(tasksData);
+        } catch (error) {
+          console.error("Error fetching tasks for date:", error);
+        } finally {
+          setIsFetchingDateTasks(false);
+        }
+      }
+    };
+
+    fetchTasksForDate();
+  }, [selectedDate]); // Run when selectedDate changes
+
+  // Fetch tasks when month changes to update event count
+  useEffect(() => {
+    const fetchTasksForMonth = async () => {
+      const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
+
+      if (useApi && !loading) {
+        setIsFetchingMonth(true);
+        try {
+          const tasksData = await tasksApi.getAll();
+          setTasks(tasksData);
+        } catch (error) {
+          console.error("Error fetching tasks for month:", error);
+        } finally {
+          setIsFetchingMonth(false);
+        }
+      }
+    };
+
+    fetchTasksForMonth();
+  }, [currentDate]); // Run when month/year changes
 
   const generateCalendar = () => {
     const year = currentDate.getFullYear();
@@ -108,8 +127,10 @@ const CalendarScreen = () => {
   }).length;
 
   const getTaskProject = (task) => {
-    if (!task.projectId) return null;
-    return projects.find((p) => p.id === task.projectId);
+    // Handle both camelCase (projectId) and snake_case (project_id) from API
+    const taskProjectId = task.projectId || task.project_id;
+    if (!taskProjectId) return null;
+    return projects.find((p) => p.id === taskProjectId);
   };
 
   if (loading || isRefreshing) {
@@ -213,136 +234,168 @@ const CalendarScreen = () => {
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Calendar Grid */}
           <div>
-            {/* Days of week */}
-            <div className="grid grid-cols-7 gap-2 mb-3">
-              {daysOfWeek.map((day) => (
-                <div
-                  key={day}
-                  className="text-center text-sm text-gray-500 font-medium"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Dates */}
-            <div className="grid grid-cols-7 gap-2">
-              {calendarDates.map((item) => (
-                <div key={item.id} className="aspect-square">
-                  {item.date && (
-                    <button
-                      onClick={() => setSelectedDate(item.fullDate)}
-                      className={`w-full h-full rounded-xl flex flex-col items-center justify-center transition ${
-                        selectedDate.toDateString() ===
-                        item.fullDate.toDateString()
-                          ? "bg-purple-600 text-white"
-                          : "hover:bg-gray-100 text-gray-700"
-                      }`}
+            {isFetchingMonth ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              </div>
+            ) : (
+              <>
+                {/* Days of week */}
+                <div className="grid grid-cols-7 gap-2 mb-3">
+                  {daysOfWeek.map((day) => (
+                    <div
+                      key={day}
+                      className="text-center text-sm text-gray-500 font-medium"
                     >
-                      <span
-                        className={`text-xs ${
-                          selectedDate.toDateString() ===
-                          item.fullDate.toDateString()
-                            ? "text-purple-200"
-                            : "text-gray-400"
-                        }`}
-                      >
-                        {item.day}
-                      </span>
-                      <span className="text-lg font-semibold">{item.date}</span>
-                    </button>
-                  )}
+                      {day}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+
+                {/* Dates */}
+                <div className="grid grid-cols-7 gap-2">
+                  {calendarDates.map((item) => (
+                    <div key={item.id} className="aspect-square">
+                      {item.date && (
+                        <button
+                          onClick={() => setSelectedDate(item.fullDate)}
+                          className={`w-full h-full rounded-xl flex flex-col items-center justify-center transition ${
+                            selectedDate.toDateString() ===
+                            item.fullDate.toDateString()
+                              ? "bg-purple-600 text-white"
+                              : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          <span
+                            className={`text-xs ${
+                              selectedDate.toDateString() ===
+                              item.fullDate.toDateString()
+                                ? "text-purple-200"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            {item.day}
+                          </span>
+                          <span className="text-lg font-semibold">
+                            {item.date}
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Tasks List */}
           <div className="mt-6 lg:mt-0">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg lg:text-xl font-bold">
-                Tasks for{" "}
-                {selectedDate.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                })}
-              </h3>
-            </div>
-            <div className="space-y-3">
-              {tasksForDate.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-400 mb-3">No tasks for this date</p>
-                  <button
-                    onClick={() => navigate("/task/new")}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition text-sm"
-                  >
-                    Create Task
-                  </button>
+            {isFetchingMonth ? (
+              <div className="flex justify-center items-center py-20">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg lg:text-xl font-bold">
+                    Tasks for{" "}
+                    {selectedDate.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </h3>
                 </div>
-              ) : (
-                tasksForDate.map((task) => {
-                  const project = getTaskProject(task);
-                  return (
-                    <button
-                      key={task.id}
-                      type="button"
-                      className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition w-full text-left"
-                      onClick={() => navigate(`/task/${task.id}`)}
-                      aria-label={`View task: ${task.title}`}
-                    >
-                      <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg
-                          className="w-5 h-5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="text-gray-700 font-medium block truncate">
-                          {task.title}
-                        </span>
-                        <div className="flex items-center gap-2 mt-1">
-                          {task.startTime && task.endTime && (
-                            <span className="text-xs text-gray-400">
-                              {task.startTime} - {task.endTime}
-                            </span>
-                          )}
-                          {project && (
-                            <>
-                              {task.startTime && task.endTime && (
-                                <span className="text-xs text-gray-300">•</span>
-                              )}
-                              <span className="text-xs text-purple-600 font-medium truncate">
-                                {project.title}
-                              </span>
-                            </>
-                          )}
+                <div className="space-y-3">
+                  {(() => {
+                    if (isFetchingDateTasks) {
+                      return (
+                        <div className="flex justify-center items-center py-12">
+                          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
                         </div>
-                      </div>
-                      {task.status === "completed" && (
-                        <svg
-                          className="w-5 h-5 text-green-500 flex-shrink-0"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
+                      );
+                    }
+                    if (tasksForDate.length === 0) {
+                      return (
+                        <div className="text-center py-8">
+                          <p className="text-gray-400 mb-3">
+                            No tasks for this date
+                          </p>
+                          <button
+                            onClick={() => navigate("/task/new")}
+                            className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition text-sm"
+                          >
+                            Create Task
+                          </button>
+                        </div>
+                      );
+                    }
+                    return tasksForDate.map((task) => {
+                      const project = getTaskProject(task);
+                      return (
+                        <button
+                          key={task.id}
+                          type="button"
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-xl cursor-pointer transition w-full text-left"
+                          onClick={() => navigate(`/task/${task.id}`)}
+                          aria-label={`View task: ${task.title}`}
                         >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      )}
-                    </button>
-                  );
-                })
-              )}
-            </div>
+                          <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-5 h-5 text-white"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-gray-700 font-medium block truncate">
+                              {task.title}
+                            </span>
+                            <div className="flex items-center gap-2 mt-1">
+                              {task.startTime && task.endTime && (
+                                <span className="text-xs text-gray-400">
+                                  {task.startTime} - {task.endTime}
+                                </span>
+                              )}
+                              {project && (
+                                <>
+                                  {task.startTime && task.endTime && (
+                                    <span className="text-xs text-gray-300">
+                                      •
+                                    </span>
+                                  )}
+                                  <span className="text-xs text-purple-600 font-medium truncate">
+                                    {project.title}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </div>
+                          {task.status === "completed" && (
+                            <svg
+                              className="w-5 h-5 text-green-500 flex-shrink-0"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

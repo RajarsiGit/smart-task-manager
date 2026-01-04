@@ -388,7 +388,7 @@ const TaskDetailScreen = () => {
                       value={project.id}
                       className="text-gray-900"
                     >
-                      {project.name} - {project.title}
+                      {project.name}
                     </option>
                   ))}
                 </select>

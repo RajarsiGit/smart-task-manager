@@ -66,8 +66,10 @@ const HomeScreen = () => {
   };
 
   const getTaskProject = (task) => {
-    if (!task.projectId) return null;
-    return projects.find((p) => p.id === task.projectId);
+    // Handle both camelCase (projectId) and snake_case (project_id) from API
+    const taskProjectId = task.projectId || task.project_id;
+    if (!taskProjectId) return null;
+    return projects.find((p) => p.id === taskProjectId);
   };
 
   const handleDeleteProject = (e, projectId) => {
