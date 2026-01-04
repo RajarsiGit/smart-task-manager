@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const HomeScreen = () => {
   const navigate = useNavigate();
-  const { projects, tasks, user, removeProject } = useApp();
+  const { projects, tasks, user, removeProject, loading } = useApp();
   const [activeTab, setActiveTab] = useState("all");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const filteredTasks = tasks.filter((task) => {
     if (activeTab === "all") return true;
@@ -36,11 +38,19 @@ const HomeScreen = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (projectToDelete) {
-      removeProject(projectToDelete);
-      setShowDeleteModal(false);
-      setProjectToDelete(null);
+      setIsDeleting(true);
+      try {
+        await removeProject(projectToDelete);
+        setShowDeleteModal(false);
+        setProjectToDelete(null);
+      } catch (error) {
+        console.error('Error deleting project:', error);
+        alert('Failed to delete project. Please try again.');
+      } finally {
+        setIsDeleting(false);
+      }
     }
   };
 
@@ -60,11 +70,17 @@ const HomeScreen = () => {
     navigate(`/project/${projectId}`);
   };
 
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
   return (
-    <div className="w-full max-w-7xl mx-auto">
-      {/* Desktop Layout */}
-      <div className="hidden lg:block">
-        <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+    <>
+      {isDeleting && <LoadingSpinner fullScreen />}
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Desktop Layout */}
+        <div className="hidden lg:block">
+          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
           {/* Header */}
           <div className="flex justify-between items-center mb-8">
             <div>
@@ -199,9 +215,11 @@ const HomeScreen = () => {
                     <h3 className="text-xl font-semibold mb-2">
                       {project.title}
                     </h3>
-                    <p className="text-sm opacity-80">
-                      {formatDate(project.date)}
-                    </p>
+                    {project.date && (
+                      <p className="text-sm opacity-75">
+                        {formatDate(project.date)}
+                      </p>
+                    )}
                   </button>
                 ))}
               </div>
@@ -482,9 +500,11 @@ const HomeScreen = () => {
                   <h3 className="text-lg font-semibold mb-2">
                     {project.title}
                   </h3>
-                  <p className="text-sm opacity-80">
-                    {formatDate(project.date)}
-                  </p>
+                  {project.date && (
+                    <p className="text-sm opacity-75">
+                      {formatDate(project.date)}
+                    </p>
+                  )}
                 </button>
               ))
             )}
@@ -623,7 +643,8 @@ const HomeScreen = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

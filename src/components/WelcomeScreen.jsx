@@ -2,11 +2,12 @@ import { useState } from "react";
 
 const WelcomeScreen = ({ onComplete }) => {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (name.trim()) {
-      onComplete(name.trim());
+    if (name.trim() && email.trim()) {
+      onComplete({ name: name.trim(), email: email.trim() });
     }
   };
 
@@ -55,6 +56,24 @@ const WelcomeScreen = ({ onComplete }) => {
             />
           </div>
 
+          <div>
+            <label
+              htmlFor="welcome-email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Your email
+            </label>
+            <input
+              id="welcome-email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Enter your email"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent text-lg"
+            />
+          </div>
+
           <button
             type="submit"
             className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition transform hover:scale-105"
@@ -64,7 +83,7 @@ const WelcomeScreen = ({ onComplete }) => {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          <p>All your data is stored locally on your device</p>
+          <p>Your data syncs to the cloud database</p>
         </div>
       </div>
     </div>

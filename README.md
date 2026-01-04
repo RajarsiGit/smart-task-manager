@@ -59,22 +59,38 @@ A beautiful and functional task management application built with React, Vite, a
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - npm or yarn
+- [Neon Account](https://console.neon.tech/signup) (for database)
+- [Vercel Account](https://vercel.com/signup) (for deployment)
 
-### Installation
+### Local Development Setup
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-2. Start the development server:
-```bash
-npm run dev
-```
+2. **Set up environment variables:**
+   ```bash
+   cp .env.example .env
+   ```
+   Add your Neon database URL to `.env`:
+   ```
+   DATABASE_URL=your_neon_connection_string
+   ```
 
-3. Open your browser and navigate to `http://localhost:5173`
+3. **Initialize database:**
+   - Login to [Neon Console](https://console.neon.tech)
+   - Create a new project
+   - Run the SQL from `schema.sql` in the SQL Editor
+
+4. **Start development server:**
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser and navigate to `http://localhost:5173`
 
 ### Build for Production
 
@@ -83,6 +99,10 @@ npm run build
 ```
 
 The built files will be in the `dist` directory.
+
+### Deploy to Vercel
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions with Neon Postgres.
 
 ## Usage
 
@@ -139,11 +159,20 @@ Access your profile settings by clicking the profile icon in the home screen hea
 
 ## Technology Stack
 
+### Frontend
 - **React 18** - UI framework
 - **Vite** - Build tool and dev server
 - **Tailwind CSS** - Styling
 - **React Router** - Navigation
-- **localStorage** - Data persistence
+
+### Backend
+- **Vercel Serverless Functions** - API endpoints
+- **Neon Postgres** - Cloud database
+- **@neondatabase/serverless** - Database driver
+
+### Data Persistence
+- **Cloud Database** - PostgreSQL on Neon (primary)
+- **localStorage** - Local fallback/migration support
 
 ## Project Structure
 
@@ -160,10 +189,16 @@ src/
 ├── context/
 │   └── AppContext.jsx           # Global state management
 ├── utils/
-│   └── localStorage.js          # localStorage utilities
+│   ├── api.js                   # API client for serverless functions
+│   └── localStorage.js          # localStorage utilities (legacy)
 ├── App.jsx                      # Main app component
 ├── main.jsx                     # App entry point
 └── index.css                    # Global styles
+api/
+├── db.js                        # Neon database connection
+├── users.js                     # User management endpoint
+├── projects.js                  # Projects CRUD endpoint
+└── tasks.js                     # Tasks CRUD endpoint
 public/
 ├── favicon.svg                  # Custom app icon
 └── manifest.json                # PWA manifest

@@ -29,7 +29,7 @@ export const addProject = (project) => {
   const newProject = {
     ...project,
     id: Date.now(),
-    date: project.date || new Date().toISOString(),
+    date: new Date().toISOString(),
   };
   projects.push(newProject);
   localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));

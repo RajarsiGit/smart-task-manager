@@ -1,18 +1,29 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
   const { user, updateUserProfile, clearAllData } = useApp();
   const [name, setName] = useState(user?.name || "");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (name.trim()) {
-      updateUserProfile({ name: name.trim() });
-      navigate("/");
+      setIsSaving(true);
+      try {
+        await updateUserProfile({ name: name.trim() });
+        navigate("/");
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        alert('Failed to update profile. Please try again.');
+      } finally {
+        setIsSaving(false);
+      }
     }
   };
 
@@ -20,9 +31,16 @@ const ProfileSettings = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    clearAllData();
-    setShowDeleteModal(false);
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await clearAllData();
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      alert('Failed to delete profile. Please try again.');
+      setIsDeleting(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -30,8 +48,10 @@ const ProfileSettings = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
+    <>
+      {(isSaving || isDeleting) && <LoadingSpinner fullScreen />}
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <button
@@ -167,7 +187,8 @@ const ProfileSettings = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

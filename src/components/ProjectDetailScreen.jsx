@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ProjectDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { projects, tasks, removeProject } = useApp();
+  const { projects, tasks, removeProject, loading } = useApp();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const project = projects.find((p) => p.id === Number.parseInt(id));
   const projectTasks = tasks.filter((task) => {
@@ -30,15 +32,26 @@ const ProjectDetailScreen = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    removeProject(Number.parseInt(id));
-    setShowDeleteModal(false);
-    navigate("/");
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await removeProject(Number.parseInt(id));
+      setShowDeleteModal(false);
+      navigate("/");
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project. Please try again.');
+      setIsDeleting(false);
+    }
   };
 
   const cancelDelete = () => {
     setShowDeleteModal(false);
   };
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   if (!project) {
     return (
@@ -57,8 +70,10 @@ const ProjectDetailScreen = () => {
   }
 
   return (
-    <div className="w-full max-w-4xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
+    <>
+      {isDeleting && <LoadingSpinner fullScreen />}
+      <div className="w-full max-w-4xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <button
@@ -132,12 +147,14 @@ const ProjectDetailScreen = () => {
             </div>
             <span className="text-lg opacity-90">{project.name}</span>
           </div>
-          <h3 className="text-2xl lg:text-3xl font-bold mb-3">
+          <h3 className="text-2xl lg:text-3xl font-bold mb-2">
             {project.title}
           </h3>
-          <p className="text-sm lg:text-base opacity-90">
-            {formatDate(project.date)}
-          </p>
+          {project.date && (
+            <p className="text-base opacity-75">
+              {formatDate(project.date)}
+            </p>
+          )}
         </div>
 
         {/* Tasks Section */}
@@ -280,7 +297,8 @@ const ProjectDetailScreen = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

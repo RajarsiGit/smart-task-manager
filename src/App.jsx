@@ -11,8 +11,8 @@ import ProfileSettings from "./components/ProfileSettings";
 function AppContent() {
   const { user, updateUserProfile } = useApp();
 
-  const handleWelcomeComplete = (name) => {
-    updateUserProfile({ name });
+  const handleWelcomeComplete = (userData) => {
+    updateUserProfile(userData);
   };
 
   if (!user) {

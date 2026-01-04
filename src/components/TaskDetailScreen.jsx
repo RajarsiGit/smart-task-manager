@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 import * as storage from "../utils/localStorage";
 
 const TaskDetailScreen = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const { createTask, editTask, removeTask, projects, selectedDate } = useApp();
+  const { createTask, editTask, removeTask, projects, selectedDate, loading } = useApp();
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const isNewTask = id === "new";
   const projectIdFromQuery = searchParams.get("projectId");
@@ -127,32 +130,47 @@ const TaskDetailScreen = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const taskData = {
-      ...formData,
-      date: new Date(formData.date).toISOString(),
-      projectId: formData.projectId
-        ? Number.parseInt(formData.projectId)
-        : null,
-    };
+    setIsSaving(true);
+    try {
+      const taskData = {
+        ...formData,
+        date: new Date(formData.date).toISOString(),
+        projectId: formData.projectId
+          ? Number.parseInt(formData.projectId)
+          : null,
+      };
 
-    if (isNewTask) {
-      createTask(taskData);
-    } else {
-      editTask(id, taskData);
+      if (isNewTask) {
+        await createTask(taskData);
+      } else {
+        await editTask(id, taskData);
+      }
+      navigate("/");
+    } catch (error) {
+      console.error('Error saving task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
-    navigate("/");
   };
 
   const handleDelete = () => {
     setShowDeleteModal(true);
   };
 
-  const confirmDelete = () => {
-    removeTask(id);
-    setShowDeleteModal(false);
-    navigate("/");
+  const confirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      await removeTask(id);
+      setShowDeleteModal(false);
+      navigate("/");
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task. Please try again.');
+      setIsDeleting(false);
+    }
   };
 
   const cancelDelete = () => {
@@ -164,11 +182,13 @@ const TaskDetailScreen = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 lg:p-8 text-white"
-      >
+    <>
+      {(isSaving || isDeleting) && <LoadingSpinner fullScreen />}
+      <div className="w-full max-w-2xl mx-auto">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 lg:p-8 text-white"
+        >
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-center">
@@ -568,7 +588,8 @@ const TaskDetailScreen = () => {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 };
 

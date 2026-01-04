@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const CreateProject = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { projects, createProject, editProject } = useApp();
+  const [isSaving, setIsSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -44,14 +46,22 @@ const CreateProject = () => {
     }
   }, [id, projects]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (id && id !== "new") {
-      editProject(Number.parseInt(id), formData);
-    } else {
-      createProject(formData);
+    setIsSaving(true);
+    try {
+      if (id && id !== "new") {
+        await editProject(Number.parseInt(id), formData);
+      } else {
+        await createProject(formData);
+      }
+      navigate("/");
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert('Failed to save project. Please try again.');
+    } finally {
+      setIsSaving(false);
     }
-    navigate("/");
   };
 
   const handleChange = (e) => {
@@ -60,8 +70,10 @@ const CreateProject = () => {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
+    <>
+      {isSaving && <LoadingSpinner fullScreen />}
+      <div className="w-full max-w-2xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-xl p-6 lg:p-8">
         <div className="flex justify-between items-center mb-6">
           <button onClick={() => navigate("/")} className="p-2">
             <svg
@@ -158,8 +170,9 @@ const CreateProject = () => {
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 

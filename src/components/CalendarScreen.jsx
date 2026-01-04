@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import LoadingSpinner from "./LoadingSpinner";
 
 const CalendarScreen = () => {
   const navigate = useNavigate();
-  const { tasks, projects, selectedDate, setSelectedDate } = useApp();
+  const { tasks, projects, selectedDate, setSelectedDate, loading } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDates, setCalendarDates] = useState([]);
 
@@ -75,6 +76,10 @@ const CalendarScreen = () => {
     if (!task.projectId) return null;
     return projects.find((p) => p.id === task.projectId);
   };
+
+  if (loading) {
+    return <LoadingSpinner fullScreen />;
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
