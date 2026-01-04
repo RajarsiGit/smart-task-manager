@@ -101,7 +101,7 @@ const ProjectDetailScreen = () => {
               Tasks ({projectTasks.length})
             </h3>
             <button
-              onClick={() => navigate('/task/new')}
+              onClick={() => navigate(`/task/new?projectId=${id}`)}
               className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition text-sm font-medium"
             >
               + New Task
@@ -113,7 +113,7 @@ const ProjectDetailScreen = () => {
               <div className="text-center py-12 bg-gray-50 rounded-2xl">
                 <p className="text-gray-400 mb-4">No tasks in this project</p>
                 <button
-                  onClick={() => navigate('/task/new')}
+                  onClick={() => navigate(`/task/new?projectId=${id}`)}
                   className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition"
                 >
                   Create First Task

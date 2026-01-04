@@ -23,7 +23,7 @@ const CreateProject = () => {
   ]
 
   useEffect(() => {
-    if (id) {
+    if (id && id !== 'new') {
       const project = projects.find(p => p.id === parseInt(id))
       if (project) {
         setFormData({
@@ -37,7 +37,7 @@ const CreateProject = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (id) {
+    if (id && id !== 'new') {
       editProject(parseInt(id), formData)
     } else {
       createProject(formData)
@@ -59,7 +59,7 @@ const CreateProject = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <h2 className="text-lg font-semibold">{id ? 'Edit Project' : 'Create Project'}</h2>
+          <h2 className="text-lg font-semibold">{id && id !== 'new' ? 'Edit Project' : 'Create Project'}</h2>
           <div className="w-10"></div>
         </div>
 
@@ -119,7 +119,7 @@ const CreateProject = () => {
               type="submit"
               className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold hover:bg-purple-700 transition"
             >
-              {id ? 'Update Project' : 'Create Project'}
+              {id && id !== 'new' ? 'Update Project' : 'Create Project'}
             </button>
           </div>
         </form>

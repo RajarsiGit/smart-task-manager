@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 import * as storage from '../utils/localStorage'
 
 const TaskDetailScreen = () => {
   const navigate = useNavigate()
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
   const { createTask, editTask, removeTask, projects, selectedDate } = useApp()
 
   const isNewTask = id === 'new'
+  const projectIdFromQuery = searchParams.get('projectId')
 
   const getFormattedDate = (date) => {
     const d = new Date(date)
@@ -27,12 +29,20 @@ const TaskDetailScreen = () => {
     tags: [],
     categories: [],
     status: 'in_progress',
-    projectId: null
+    projectId: projectIdFromQuery ? parseInt(projectIdFromQuery) : null
   })
 
   const [newTag, setNewTag] = useState('')
   const [newCategory, setNewCategory] = useState('')
   const [showDeleteModal, setShowDeleteModal] = useState(false)
+
+  // Get the project associated with this task (either from query param or from task data)
+  const getAssociatedProject = () => {
+    const projectId = projectIdFromQuery ? parseInt(projectIdFromQuery) : formData.projectId
+    return projectId ? projects.find(p => p.id === projectId) : null
+  }
+
+  const associatedProject = getAssociatedProject()
 
   const availableTags = ['Design', 'Meeting', 'Coding', 'Testing', 'Planning', 'Review']
   const availableCategories = ['UI', 'Testing', 'Quick call', 'Backend', 'Frontend', 'DevOps']
@@ -131,21 +141,43 @@ const TaskDetailScreen = () => {
     <div className="w-full max-w-2xl mx-auto">
       <form onSubmit={handleSubmit} className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-3xl shadow-xl p-6 lg:p-8 text-white">
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <span className="text-sm opacity-90">{isNewTask ? 'Create Task' : 'Edit Task'}</span>
-          {!isNewTask && (
-            <button type="button" onClick={handleDelete} className="p-2 hover:bg-red-500 rounded-full">
+        <div className="mb-8">
+          <div className="flex justify-between items-center">
+            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-white/10 rounded-full">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
+            <span className="text-sm opacity-90">{isNewTask ? 'Create Task' : 'Edit Task'}</span>
+            {!isNewTask && (
+              <button type="button" onClick={handleDelete} className="p-2 hover:bg-red-500 rounded-full">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            )}
+            {isNewTask && <div className="w-10"></div>}
+          </div>
+
+          {/* Breadcrumb */}
+          {associatedProject && (
+            <div className="flex items-center gap-2 mt-4 text-sm opacity-90">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+              </svg>
+              <button
+                type="button"
+                onClick={() => navigate(`/project/${associatedProject.id}/view`)}
+                className="hover:underline"
+              >
+                {associatedProject.title}
+              </button>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              <span>{isNewTask ? 'New Task' : 'Edit Task'}</span>
+            </div>
           )}
-          {isNewTask && <div className="w-10"></div>}
         </div>
 
         {/* Task Info */}

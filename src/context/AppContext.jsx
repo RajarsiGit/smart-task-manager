@@ -30,42 +30,42 @@ export const AppProvider = ({ children }) => {
   // Project operations
   const createProject = (projectData) => {
     const newProject = storage.addProject(projectData)
-    setProjects([...projects, newProject])
+    setProjects(prev => [...prev, newProject])
     return newProject
   }
 
   const editProject = (id, updates) => {
     const updated = storage.updateProject(id, updates)
     if (updated) {
-      setProjects(projects.map(p => p.id === id ? updated : p))
+      setProjects(prev => prev.map(p => p.id === id ? updated : p))
     }
     return updated
   }
 
   const removeProject = (id) => {
     storage.deleteProject(id)
-    setProjects(projects.filter(p => p.id !== id))
-    setTasks(tasks.filter(t => t.projectId !== id))
+    setProjects(prev => prev.filter(p => p.id !== id))
+    setTasks(prev => prev.filter(t => t.projectId !== id))
   }
 
   // Task operations
   const createTask = (taskData) => {
     const newTask = storage.addTask(taskData)
-    setTasks([...tasks, newTask])
+    setTasks(prev => [...prev, newTask])
     return newTask
   }
 
   const editTask = (id, updates) => {
     const updated = storage.updateTask(id, updates)
     if (updated) {
-      setTasks(tasks.map(t => t.id === parseInt(id) ? updated : t))
+      setTasks(prev => prev.map(t => t.id === parseInt(id) ? updated : t))
     }
     return updated
   }
 
   const removeTask = (id) => {
     storage.deleteTask(id)
-    setTasks(tasks.filter(t => t.id !== parseInt(id)))
+    setTasks(prev => prev.filter(t => t.id !== parseInt(id)))
   }
 
   const getTasksByDate = (date) => {

@@ -75,9 +75,9 @@ const ProfileSettings = () => {
           </button>
         </form>
 
-        {/* Danger Zone */}
+        {/* Account Deletion */}
         <div className="mt-8 pt-6 border-t border-gray-200">
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Danger Zone</h3>
+          <h3 className="text-sm font-medium text-gray-700 mb-3">Account Deletion</h3>
           <div className="bg-red-50 border border-red-200 rounded-xl p-4">
             <p className="text-sm text-gray-700 mb-3">
               Deleting your profile will permanently remove all your projects and tasks. This action cannot be undone.
