@@ -287,7 +287,7 @@ const TaskDetailScreen = () => {
                 value={formData.date}
                 onChange={handleChange}
                 required
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 white-icons"
               />
             </div>
 
@@ -303,7 +303,7 @@ const TaskDetailScreen = () => {
                 name="projectId"
                 value={formData.projectId || ""}
                 onChange={handleChange}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 white-icons"
               >
                 <option value="" className="text-gray-900">
                   No Project
@@ -336,7 +336,7 @@ const TaskDetailScreen = () => {
                 name="startTime"
                 value={formData.startTime}
                 onChange={handleChange}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 white-icons"
               />
             </div>
             <div>
@@ -352,7 +352,7 @@ const TaskDetailScreen = () => {
                 name="endTime"
                 value={formData.endTime}
                 onChange={handleChange}
-                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30"
+                className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-white/30 white-icons"
               />
             </div>
           </div>
@@ -378,10 +378,8 @@ const TaskDetailScreen = () => {
         </div>
 
         {/* Tags */}
-        <div className="mb-4" role="group" aria-labelledby="tags-label">
-          <span id="tags-label" className="text-sm opacity-75 mb-2 block">
-            Tags
-          </span>
+        <fieldset className="mb-4">
+          <legend className="text-sm opacity-75 mb-2 block">Tags</legend>
           <div className="flex flex-wrap gap-2 mb-3">
             {availableTags.map((tag) => (
               <button
@@ -427,13 +425,11 @@ const TaskDetailScreen = () => {
               Add
             </button>
           </div>
-        </div>
+        </fieldset>
 
         {/* Categories */}
-        <div className="mb-6" role="group" aria-labelledby="categories-label">
-          <span id="categories-label" className="text-sm opacity-75 mb-2 block">
-            Categories
-          </span>
+        <fieldset className="mb-6">
+          <legend className="text-sm opacity-75 mb-2 block">Categories</legend>
           <div className="flex flex-wrap gap-2 mb-3">
             {availableCategories.map((category) => (
               <button
@@ -479,14 +475,12 @@ const TaskDetailScreen = () => {
               Add
             </button>
           </div>
-        </div>
+        </fieldset>
 
         {/* Status Buttons */}
         {!isNewTask && (
-          <div className="mb-6" role="group" aria-labelledby="status-label">
-            <span id="status-label" className="text-sm opacity-75 mb-2 block">
-              Status
-            </span>
+          <fieldset className="mb-6">
+            <legend className="text-sm opacity-75 mb-2 block">Status</legend>
             <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
@@ -515,7 +509,7 @@ const TaskDetailScreen = () => {
                   : "Mark as Completed"}
               </button>
             </div>
-          </div>
+          </fieldset>
         )}
 
         {/* Submit Button */}

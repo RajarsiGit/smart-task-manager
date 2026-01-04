@@ -131,17 +131,17 @@ Both `TaskDetailScreen` and `CreateProject` use the same pattern:
    - Example: `<label htmlFor="task-title">Title</label>` with `<input id="task-title" />`
 
 2. **Button Groups**: When labeling groups of buttons (not single inputs)
-   - Use `role="group"` on the container div
-   - Use `aria-labelledby` pointing to a span with unique id
+   - Use `<fieldset>` element instead of div with role="group"
+   - Use `<legend>` instead of span for the group label
    - Example:
    ```jsx
-   <div role="group" aria-labelledby="tags-label">
-     <span id="tags-label" className="...">Tags</span>
+   <fieldset className="mb-4">
+     <legend className="text-sm opacity-75 mb-2 block">Tags</legend>
      <div className="flex gap-2">
        <button>Tag 1</button>
        <button>Tag 2</button>
      </div>
-   </div>
+   </fieldset>
    ```
 
 3. **Interactive Elements**: Always use semantic HTML
@@ -179,7 +179,8 @@ Both `TaskDetailScreen` and `CreateProject` use the same pattern:
    - Good: `setProjects(prev => [...prev, newProject])`
 
 9. **Accessibility Violations**: Never skip accessibility requirements
-   - All labels must be associated (htmlFor or aria-labelledby)
+   - All labels must be associated with inputs using htmlFor
+   - Use `<fieldset>` and `<legend>` for button groups, not `<div role="group">`
    - Use semantic HTML (`<button>` not `<div role="button">`)
    - Never use array indices as React keys
 

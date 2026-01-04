@@ -123,13 +123,10 @@ const CreateProject = () => {
             />
           </div>
 
-          <div role="group" aria-labelledby="color-theme-label">
-            <span
-              id="color-theme-label"
-              className="block text-sm font-medium text-gray-700 mb-3"
-            >
+          <fieldset>
+            <legend className="block text-sm font-medium text-gray-700 mb-3">
               Color Theme
-            </span>
+            </legend>
             <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
               {colorOptions.map((option) => (
                 <button
@@ -150,7 +147,7 @@ const CreateProject = () => {
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
 
           <div className="pt-4">
             <button

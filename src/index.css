@@ -23,4 +23,16 @@
   .animate-fadeIn {
     animation: fadeIn 0.5s ease-out;
   }
+
+  /* White icons for date/time/select inputs */
+  .white-icons::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(100);
+    cursor: pointer;
+  }
+
+  /* Shift select dropdown arrow to the left */
+  select.white-icons {
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
 }
