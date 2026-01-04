@@ -4,37 +4,14 @@ const STORAGE_KEYS = {
   USER: 'taskManager_user'
 }
 
-// Initialize with default data if empty
+// Initialize with empty data if not present
 const initializeStorage = () => {
   if (!localStorage.getItem(STORAGE_KEYS.PROJECTS)) {
-    const defaultProjects = [
-      {
-        id: Date.now(),
-        name: 'Project 0.1',
-        title: 'UI/UX Designing',
-        date: new Date().toISOString(),
-        color: 'bg-gradient-to-br from-purple-600 to-purple-700'
-      }
-    ]
-    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(defaultProjects))
+    localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify([]))
   }
 
   if (!localStorage.getItem(STORAGE_KEYS.TASKS)) {
-    const defaultTasks = [
-      {
-        id: Date.now(),
-        projectId: null,
-        title: 'Design Changes',
-        description: 'Lorem ipsum dolor sit amet, or adipiscing elit, sed diam nonumy eiusmod dolor sit amet erat incididunt.',
-        date: new Date().toISOString(),
-        startTime: '01:22 pm',
-        endTime: '03:20 pm',
-        tags: ['Design'],
-        categories: ['UI'],
-        status: 'pending'
-      }
-    ]
-    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(defaultTasks))
+    localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify([]))
   }
 
   // Don't auto-initialize user - let WelcomeScreen handle it
@@ -146,4 +123,11 @@ export const getUser = () => {
 
 export const updateUser = (userData) => {
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData))
+}
+
+// Clear all data
+export const clearAllData = () => {
+  localStorage.removeItem(STORAGE_KEYS.PROJECTS)
+  localStorage.removeItem(STORAGE_KEYS.TASKS)
+  localStorage.removeItem(STORAGE_KEYS.USER)
 }

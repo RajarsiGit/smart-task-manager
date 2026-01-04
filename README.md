@@ -35,6 +35,12 @@ A beautiful and functional task management application built with React, Vite, a
   - No backend required
   - First-time setup screen to capture user name
 
+- **Profile Management**
+  - Update your display name anytime
+  - Delete profile option to clear all data
+  - Two-step confirmation to prevent accidental deletion
+  - Complete data reset returns to welcome screen
+
 ## Getting Started
 
 ### Prerequisites
@@ -69,6 +75,8 @@ The built files will be in the `dist` directory.
 ### First Time Setup
 
 When you first launch the app, you'll be greeted with a welcome screen asking for your name. This personalization makes the app feel more welcoming and your name will be displayed on the home screen.
+
+The app starts completely empty - no default projects or tasks. You have a clean slate to organize your work the way you want!
 
 ### Creating a Project
 
@@ -105,6 +113,15 @@ Use the tabs on the home screen to filter tasks:
 - **My Tasks**: Show all tasks
 - **In Progress**: Show only in-progress tasks
 - **Completed**: Show only completed tasks
+
+### Profile Settings
+
+Access your profile settings by clicking the profile icon in the home screen header:
+- **Update Name**: Change your display name
+- **Delete Profile**: Permanently delete your profile and all data
+  - This removes all projects, tasks, and user information
+  - Returns you to the welcome screen
+  - Cannot be undone - use with caution!
 
 ## Technology Stack
 

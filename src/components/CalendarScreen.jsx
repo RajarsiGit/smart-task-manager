@@ -4,9 +4,8 @@ import { useApp } from '../context/AppContext'
 
 const CalendarScreen = () => {
   const navigate = useNavigate()
-  const { tasks } = useApp()
+  const { tasks, selectedDate, setSelectedDate } = useApp()
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [selectedDate, setSelectedDate] = useState(new Date())
   const [calendarDates, setCalendarDates] = useState([])
 
   const daysOfWeek = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']

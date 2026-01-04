@@ -82,6 +82,13 @@ export const AppProvider = ({ children }) => {
     setUser(userData)
   }
 
+  const clearAllData = () => {
+    storage.clearAllData()
+    setProjects([])
+    setTasks([])
+    setUser(null)
+  }
+
   const value = {
     projects,
     tasks,
@@ -97,6 +104,7 @@ export const AppProvider = ({ children }) => {
     getTasksByDate,
     getTasksByProject,
     updateUserProfile,
+    clearAllData,
     loadData
   }
 

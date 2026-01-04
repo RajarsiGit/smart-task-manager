@@ -4,7 +4,9 @@ import HomeScreen from './components/HomeScreen'
 import CalendarScreen from './components/CalendarScreen'
 import TaskDetailScreen from './components/TaskDetailScreen'
 import CreateProject from './components/CreateProject'
+import ProjectDetailScreen from './components/ProjectDetailScreen'
 import WelcomeScreen from './components/WelcomeScreen'
+import ProfileSettings from './components/ProfileSettings'
 
 function AppContent() {
   const { user, updateUserProfile } = useApp()
@@ -23,10 +25,10 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/calendar" element={<CalendarScreen />} />
-          <Route path="/task/new" element={<TaskDetailScreen />} />
           <Route path="/task/:id" element={<TaskDetailScreen />} />
-          <Route path="/project/new" element={<CreateProject />} />
+          <Route path="/project/:id/view" element={<ProjectDetailScreen />} />
           <Route path="/project/:id" element={<CreateProject />} />
+          <Route path="/profile" element={<ProfileSettings />} />
         </Routes>
       </div>
     </Router>
