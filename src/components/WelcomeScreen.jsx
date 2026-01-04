@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 const WelcomeScreen = ({ onComplete }) => {
   const [name, setName] = useState("");
@@ -88,6 +89,10 @@ const WelcomeScreen = ({ onComplete }) => {
       </div>
     </div>
   );
+};
+
+WelcomeScreen.propTypes = {
+  onComplete: PropTypes.func.isRequired,
 };
 
 export default WelcomeScreen;

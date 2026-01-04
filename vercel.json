@@ -5,6 +5,18 @@
   "framework": "vite",
   "rewrites": [
     {
+      "source": "/api/auth/login",
+      "destination": "/api/auth?path=login"
+    },
+    {
+      "source": "/api/auth/logout",
+      "destination": "/api/auth?path=logout"
+    },
+    {
+      "source": "/api/auth/me",
+      "destination": "/api/auth?path=me"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     }
@@ -14,8 +26,8 @@
       "source": "/api/(.*)",
       "headers": [
         {
-          "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "key": "Access-Control-Allow-Credentials",
+          "value": "true"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -23,7 +35,7 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, x-user-email"
+          "value": "Content-Type"
         }
       ]
     }

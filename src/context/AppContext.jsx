@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import { userApi, projectsApi, tasksApi } from "../utils/api";
+import { authApi, userApi, projectsApi, tasksApi } from "../utils/api";
 import * as storage from "../utils/localStorage";
 
 const AppContext = createContext();
@@ -22,7 +22,7 @@ export const AppProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Check if we should use API or localStorage
-  const useApi = Boolean(import.meta.env.VITE_USE_API !== 'false');
+  const useApi = Boolean(import.meta.env.VITE_USE_API !== "false");
 
   useEffect(() => {
     loadData();
@@ -34,65 +34,47 @@ export const AppProvider = ({ children }) => {
       setError(null);
 
       if (useApi) {
-        // Load user from localStorage first
-        const storedUser = storage.getUser();
+        try {
+          // Get authenticated user from cookie
+          console.log("Checking authentication...");
+          const response = await authApi.getCurrentUser();
+          const authenticatedUser = response.user;
 
-        if (storedUser && storedUser.email) {
-          console.log('Verifying user with API:', storedUser.email);
+          console.log("Authenticated user:", authenticatedUser);
+          setUser(authenticatedUser);
 
-          try {
-            // Verify/sync user with API database
-            const apiUser = await userApi.getUser(storedUser.email, storedUser.name);
+          // Fetch projects and tasks from API
+          const [projectsData, tasksData] = await Promise.all([
+            projectsApi.getAll(),
+            tasksApi.getAll(),
+          ]);
 
-            console.log('API user:', apiUser);
-
-            // Update localStorage if API returned different data
-            if (apiUser.name !== storedUser.name || apiUser.id !== storedUser.id) {
-              console.log('Syncing user data from API to localStorage');
-              storage.updateUser(apiUser);
-              setUser(apiUser);
-            } else {
-              setUser(storedUser);
-            }
-
-            // Fetch projects and tasks from API
-            const [projectsData, tasksData] = await Promise.all([
-              projectsApi.getAll(),
-              tasksApi.getAll()
-            ]);
-
-            console.log('Loaded from API:', { projects: projectsData.length, tasks: tasksData.length });
-            setProjects(projectsData);
-            setTasks(tasksData);
-          } catch (apiError) {
-            console.error('API error, falling back to localStorage:', apiError);
-            // API failed, use localStorage
-            setUser(storedUser);
-            setProjects(storage.getProjects());
-            setTasks(storage.getTasks());
-            setError('Using offline mode - API unavailable');
-          }
-        } else {
-          // No user in localStorage, load from localStorage as fallback
-          console.log('No user found, using localStorage');
-          setProjects(storage.getProjects());
-          setTasks(storage.getTasks());
+          console.log("Loaded from API:", {
+            projects: projectsData.length,
+            tasks: tasksData.length,
+          });
+          setProjects(projectsData);
+          setTasks(tasksData);
+        } catch (apiError) {
+          console.error("Not authenticated or API error:", apiError);
+          // User not authenticated - they'll see the login screen
           setUser(null);
+          setProjects([]);
+          setTasks([]);
         }
       } else {
         // Load from localStorage only
-        console.log('API disabled, using localStorage only');
+        console.log("API disabled, using localStorage only");
         setProjects(storage.getProjects());
         setTasks(storage.getTasks());
         setUser(storage.getUser());
       }
     } catch (err) {
-      console.error('Error loading data:', err);
+      console.error("Error loading data:", err);
       setError(err.message);
-      // Fallback to localStorage on error
-      setProjects(storage.getProjects());
-      setTasks(storage.getTasks());
-      setUser(storage.getUser());
+      setUser(null);
+      setProjects([]);
+      setTasks([]);
     } finally {
       setLoading(false);
     }
@@ -111,7 +93,7 @@ export const AppProvider = ({ children }) => {
         return newProject;
       }
     } catch (err) {
-      console.error('Error creating project:', err);
+      console.error("Error creating project:", err);
       throw err;
     }
   };
@@ -130,7 +112,7 @@ export const AppProvider = ({ children }) => {
         return updated;
       }
     } catch (err) {
-      console.error('Error updating project:', err);
+      console.error("Error updating project:", err);
       throw err;
     }
   };
@@ -140,14 +122,16 @@ export const AppProvider = ({ children }) => {
       if (useApi && user) {
         await projectsApi.delete(id);
         setProjects((prev) => prev.filter((p) => p.id !== id));
-        setTasks((prev) => prev.filter((t) => t.project_id !== id && t.projectId !== id));
+        setTasks((prev) =>
+          prev.filter((t) => t.project_id !== id && t.projectId !== id)
+        );
       } else {
         storage.deleteProject(id);
         setProjects((prev) => prev.filter((p) => p.id !== id));
         setTasks((prev) => prev.filter((t) => t.projectId !== id));
       }
     } catch (err) {
-      console.error('Error deleting project:', err);
+      console.error("Error deleting project:", err);
       throw err;
     }
   };
@@ -165,7 +149,7 @@ export const AppProvider = ({ children }) => {
         return newTask;
       }
     } catch (err) {
-      console.error('Error creating task:', err);
+      console.error("Error creating task:", err);
       throw err;
     }
   };
@@ -188,7 +172,7 @@ export const AppProvider = ({ children }) => {
         return updated;
       }
     } catch (err) {
-      console.error('Error updating task:', err);
+      console.error("Error updating task:", err);
       throw err;
     }
   };
@@ -203,7 +187,7 @@ export const AppProvider = ({ children }) => {
         setTasks((prev) => prev.filter((t) => t.id !== Number.parseInt(id)));
       }
     } catch (err) {
-      console.error('Error deleting task:', err);
+      console.error("Error deleting task:", err);
       throw err;
     }
   };
@@ -220,7 +204,9 @@ export const AppProvider = ({ children }) => {
 
   const getTasksByProject = (projectId) => {
     if (useApi && user) {
-      return tasks.filter((task) => task.project_id === projectId || task.projectId === projectId);
+      return tasks.filter(
+        (task) => task.project_id === projectId || task.projectId === projectId
+      );
     }
     return storage.getTasksByProject(projectId);
   };
@@ -228,50 +214,56 @@ export const AppProvider = ({ children }) => {
   // User operations
   const updateUserProfile = async (userData) => {
     try {
-      if (useApi) {
-        // If user exists, update them
-        if (user && user.email) {
-          const updated = await userApi.updateUser(user.email, userData.name);
-          setUser(updated);
-          storage.updateUser(updated); // Keep localStorage in sync
-        } else {
-          // New user - create in API
-          const newUser = await userApi.getUser(userData.email, userData.name);
-          console.log('Created new user in API:', newUser);
-          setUser(newUser);
-          storage.updateUser(newUser); // Save to localStorage
-
-          // Reload data after user creation
-          await loadData();
-        }
+      if (useApi && user) {
+        const updated = await userApi.updateUser(userData.name);
+        setUser(updated);
       } else {
         storage.updateUser(userData);
         setUser(userData);
       }
     } catch (err) {
-      console.error('Error updating user:', err);
-      // On error, still save to localStorage
-      storage.updateUser(userData);
-      setUser(userData);
+      console.error("Error updating user:", err);
+      throw err;
+    }
+  };
+
+  const logout = async () => {
+    try {
+      if (useApi) {
+        await authApi.logout();
+      }
+      // Clear state
+      setProjects([]);
+      setTasks([]);
+      setUser(null);
+      storage.clearAllData();
+    } catch (err) {
+      console.error("Error logging out:", err);
+      // Clear state anyway
+      setProjects([]);
+      setTasks([]);
+      setUser(null);
+      storage.clearAllData();
     }
   };
 
   const clearAllData = async () => {
     try {
       if (useApi && user) {
-        await userApi.deleteUser(user.email);
+        await userApi.deleteUser();
       }
-      storage.clearAllData();
+      // Clear state
       setProjects([]);
       setTasks([]);
       setUser(null);
+      storage.clearAllData();
     } catch (err) {
-      console.error('Error clearing data:', err);
-      // Clear localStorage anyway
-      storage.clearAllData();
+      console.error("Error clearing data:", err);
+      // Clear state anyway
       setProjects([]);
       setTasks([]);
       setUser(null);
+      storage.clearAllData();
     }
   };
 
@@ -284,6 +276,8 @@ export const AppProvider = ({ children }) => {
       loading,
       error,
       setSelectedDate,
+      setProjects,
+      setTasks,
       createProject,
       editProject,
       removeProject,
@@ -293,6 +287,7 @@ export const AppProvider = ({ children }) => {
       getTasksByDate,
       getTasksByProject,
       updateUserProfile,
+      logout,
       clearAllData,
       loadData,
     }),

@@ -5,18 +5,25 @@ import CalendarScreen from "./components/CalendarScreen";
 import TaskDetailScreen from "./components/TaskDetailScreen";
 import CreateProject from "./components/CreateProject";
 import ProjectDetailScreen from "./components/ProjectDetailScreen";
-import WelcomeScreen from "./components/WelcomeScreen";
+import AuthScreen from "./components/AuthScreen";
 import ProfileSettings from "./components/ProfileSettings";
 
 function AppContent() {
-  const { user, updateUserProfile } = useApp();
+  const { user, loadData, loading } = useApp();
 
-  const handleWelcomeComplete = (userData) => {
-    updateUserProfile(userData);
+  const handleAuthSuccess = async (userData) => {
+    // Reload data after successful authentication
+    await loadData();
   };
 
-  if (!user) {
-    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  // Show auth screen if not authenticated
+  if (!user && !loading) {
+    return <AuthScreen onAuthSuccess={handleAuthSuccess} />;
+  }
+
+  // Show nothing while loading
+  if (loading) {
+    return null;
   }
 
   return (

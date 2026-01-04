@@ -1,28 +1,27 @@
-import { getDb, ensureUser } from './db.js';
+import { getDb, getUserFromRequest } from "./db.js";
 
 export default async function handler(req, res) {
   // Enable CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-user-email');
+  res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
+  res.setHeader(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.setHeader("Access-Control-Allow-Credentials", "true");
 
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
   const sql = getDb();
-  const userEmail = req.headers['x-user-email'];
-
-  if (!userEmail) {
-    return res.status(401).json({ error: 'User email required in x-user-email header' });
-  }
 
   try {
-    // Ensure user exists
-    const user = await ensureUser(userEmail);
+    // Get authenticated user from cookie
+    const user = await getUserFromRequest(req);
 
     // GET /api/tasks - Get all tasks for user
-    if (req.method === 'GET') {
+    if (req.method === "GET") {
       const { id, projectId, date, status } = req.query;
 
       if (id) {
@@ -33,7 +32,7 @@ export default async function handler(req, res) {
         `;
 
         if (result.length === 0) {
-          return res.status(404).json({ error: 'Task not found' });
+          return res.status(404).json({ error: "Task not found" });
         }
 
         return res.status(200).json(result[0]);
@@ -60,7 +59,7 @@ export default async function handler(req, res) {
     }
 
     // POST /api/tasks - Create new task
-    if (req.method === 'POST') {
+    if (req.method === "POST") {
       const {
         title,
         description,
@@ -70,11 +69,11 @@ export default async function handler(req, res) {
         projectId,
         tags,
         categories,
-        status
+        status,
       } = req.body;
 
       if (!title || !date) {
-        return res.status(400).json({ error: 'Title and date are required' });
+        return res.status(400).json({ error: "Title and date are required" });
       }
 
       const result = await sql`
@@ -94,11 +93,11 @@ export default async function handler(req, res) {
           ${user.id},
           ${projectId || null},
           ${title},
-          ${description || ''},
+          ${description || ""},
           ${date},
           ${startTime || null},
           ${endTime || null},
-          ${status || 'pending'},
+          ${status || "pending"},
           ${tags || []},
           ${categories || []}
         )
@@ -109,7 +108,7 @@ export default async function handler(req, res) {
     }
 
     // PUT /api/tasks - Update task
-    if (req.method === 'PUT') {
+    if (req.method === "PUT") {
       const {
         id,
         title,
@@ -120,11 +119,11 @@ export default async function handler(req, res) {
         projectId,
         tags,
         categories,
-        status
+        status,
       } = req.body;
 
       if (!id) {
-        return res.status(400).json({ error: 'Task ID is required' });
+        return res.status(400).json({ error: "Task ID is required" });
       }
 
       const result = await sql`
@@ -144,18 +143,18 @@ export default async function handler(req, res) {
       `;
 
       if (result.length === 0) {
-        return res.status(404).json({ error: 'Task not found' });
+        return res.status(404).json({ error: "Task not found" });
       }
 
       return res.status(200).json(result[0]);
     }
 
     // DELETE /api/tasks - Delete task
-    if (req.method === 'DELETE') {
+    if (req.method === "DELETE") {
       const { id } = req.query;
 
       if (!id) {
-        return res.status(400).json({ error: 'Task ID is required' });
+        return res.status(400).json({ error: "Task ID is required" });
       }
 
       const result = await sql`
@@ -165,15 +164,17 @@ export default async function handler(req, res) {
       `;
 
       if (result.length === 0) {
-        return res.status(404).json({ error: 'Task not found' });
+        return res.status(404).json({ error: "Task not found" });
       }
 
-      return res.status(200).json({ message: 'Task deleted successfully', id: result[0].id });
+      return res
+        .status(200)
+        .json({ message: "Task deleted successfully", id: result[0].id });
     }
 
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }

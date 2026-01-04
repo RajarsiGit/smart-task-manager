@@ -1,28 +1,16 @@
 // API utility for connecting to Vercel serverless functions
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
-
-// Get user email from localStorage (temporary auth solution)
-function getUserEmail() {
-  const userData = localStorage.getItem('taskManager_user');
-  if (userData) {
-    const user = JSON.parse(userData);
-    return user.email || 'user@example.com'; // Fallback email
-  }
-  return 'user@example.com';
-}
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 
 // Generic fetch wrapper with error handling
 async function apiFetch(endpoint, options = {}) {
-  const userEmail = getUserEmail();
-
   const defaultHeaders = {
-    'Content-Type': 'application/json',
-    'x-user-email': userEmail,
+    "Content-Type": "application/json",
   };
 
   const config = {
     ...options,
+    credentials: "include", // Important: Send cookies with requests
     headers: {
       ...defaultHeaders,
       ...options.headers,
@@ -39,32 +27,58 @@ async function apiFetch(endpoint, options = {}) {
 
     return await response.json();
   } catch (error) {
-    console.error('API Error:', error);
+    console.error("API Error:", error);
     throw error;
   }
 }
 
-// ============ USER API ============
+// ============ AUTH API ============
 
-export const userApi = {
-  // Get or create user
-  getUser: async (email, name) => {
-    const query = new URLSearchParams({ email, ...(name && { name }) });
-    return apiFetch(`/users?${query}`);
-  },
-
-  // Update user name
-  updateUser: async (email, name) => {
-    return apiFetch('/users', {
-      method: 'PUT',
-      body: JSON.stringify({ email, name }),
+export const authApi = {
+  // Register new user
+  register: async (name, email, password) => {
+    return apiFetch("/auth", {
+      method: "POST",
+      body: JSON.stringify({ name, email, password }),
     });
   },
 
-  // Delete user
-  deleteUser: async (email) => {
-    return apiFetch(`/users?email=${email}`, {
-      method: 'DELETE',
+  // Login user
+  login: async (email, password) => {
+    return apiFetch("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  // Logout user
+  logout: async () => {
+    return apiFetch("/auth/logout", {
+      method: "POST",
+    });
+  },
+
+  // Get current user
+  getCurrentUser: async () => {
+    return apiFetch("/auth/me");
+  },
+};
+
+// ============ USER API ============
+
+export const userApi = {
+  // Update user name
+  updateUser: async (name) => {
+    return apiFetch("/users", {
+      method: "PUT",
+      body: JSON.stringify({ name }),
+    });
+  },
+
+  // Delete user account
+  deleteUser: async () => {
+    return apiFetch("/users", {
+      method: "DELETE",
     });
   },
 };
@@ -74,7 +88,7 @@ export const userApi = {
 export const projectsApi = {
   // Get all projects
   getAll: async () => {
-    return apiFetch('/projects');
+    return apiFetch("/projects");
   },
 
   // Get single project
@@ -84,16 +98,16 @@ export const projectsApi = {
 
   // Create project
   create: async (projectData) => {
-    return apiFetch('/projects', {
-      method: 'POST',
+    return apiFetch("/projects", {
+      method: "POST",
       body: JSON.stringify(projectData),
     });
   },
 
   // Update project
   update: async (id, projectData) => {
-    return apiFetch('/projects', {
-      method: 'PUT',
+    return apiFetch("/projects", {
+      method: "PUT",
       body: JSON.stringify({ id, ...projectData }),
     });
   },
@@ -101,7 +115,7 @@ export const projectsApi = {
   // Delete project
   delete: async (id) => {
     return apiFetch(`/projects?id=${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -112,7 +126,8 @@ export const tasksApi = {
   // Get all tasks (with optional filters)
   getAll: async (filters = {}) => {
     const query = new URLSearchParams(filters);
-    return apiFetch(`/tasks${query.toString() ? `?${query}` : ''}`);
+    const queryString = query.toString() ? `?${query}` : "";
+    return apiFetch(`/tasks${queryString}`);
   },
 
   // Get single task
@@ -137,16 +152,16 @@ export const tasksApi = {
 
   // Create task
   create: async (taskData) => {
-    return apiFetch('/tasks', {
-      method: 'POST',
+    return apiFetch("/tasks", {
+      method: "POST",
       body: JSON.stringify(taskData),
     });
   },
 
   // Update task
   update: async (id, taskData) => {
-    return apiFetch('/tasks', {
-      method: 'PUT',
+    return apiFetch("/tasks", {
+      method: "PUT",
       body: JSON.stringify({ id, ...taskData }),
     });
   },
@@ -154,7 +169,7 @@ export const tasksApi = {
   // Delete task
   delete: async (id) => {
     return apiFetch(`/tasks?id=${id}`, {
-      method: 'DELETE',
+      method: "DELETE",
     });
   },
 };
@@ -165,12 +180,12 @@ export const tasksApi = {
 export async function migrateLocalStorageToDb() {
   try {
     // Get data from localStorage
-    const projectsData = localStorage.getItem('taskManager_projects');
-    const tasksData = localStorage.getItem('taskManager_tasks');
-    const userData = localStorage.getItem('taskManager_user');
+    const projectsData = localStorage.getItem("taskManager_projects");
+    const tasksData = localStorage.getItem("taskManager_tasks");
+    const userData = localStorage.getItem("taskManager_user");
 
     if (!userData) {
-      throw new Error('No user data found in localStorage');
+      throw new Error("No user data found in localStorage");
     }
 
     const user = JSON.parse(userData);
@@ -178,7 +193,7 @@ export async function migrateLocalStorageToDb() {
     const tasks = tasksData ? JSON.parse(tasksData) : [];
 
     // Ensure user exists in database
-    await userApi.getUser(user.email || 'user@example.com', user.name);
+    await userApi.getUser(user.email || "user@example.com", user.name);
 
     // Map to track old project IDs to new ones
     const projectIdMap = {};
@@ -207,7 +222,7 @@ export async function migrateLocalStorageToDb() {
       migratedTasks: tasks.length,
     };
   } catch (error) {
-    console.error('Migration error:', error);
+    console.error("Migration error:", error);
     throw error;
   }
 }
