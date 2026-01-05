@@ -25,20 +25,19 @@ export default async function handler(req, res) {
       const { name, profile_picture } = req.body;
 
       if (!name && profile_picture === undefined) {
-        return res.status(400).json({ error: "Name or profile_picture is required" });
+        return res
+          .status(400)
+          .json({ error: "Name or profile_picture is required" });
       }
 
       // Build dynamic update query
-      let updateFields = [];
-      let values = {};
+      const values = {};
 
       if (name) {
-        updateFields.push('name');
         values.name = name;
       }
 
       if (profile_picture !== undefined) {
-        updateFields.push('profile_picture');
         values.profile_picture = profile_picture;
       }
 

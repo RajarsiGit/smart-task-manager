@@ -9,7 +9,9 @@ const ProfileSettings = () => {
   const { user, updateUserProfile, clearAllData, logout } = useApp();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
-  const [profilePicture, setProfilePicture] = useState(user?.profile_picture || null);
+  const [profilePicture, setProfilePicture] = useState(
+    user?.profile_picture || null
+  );
   const [previewUrl, setPreviewUrl] = useState(user?.profile_picture || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -91,7 +93,7 @@ const ProfileSettings = () => {
       try {
         await updateUserProfile({
           name: name.trim(),
-          profile_picture: profilePicture
+          profile_picture: profilePicture,
         });
         navigate("/");
       } catch (error) {
@@ -229,7 +231,9 @@ const ProfileSettings = () => {
                   className="hidden"
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-2">Click camera icon to change</p>
+              <p className="text-xs text-gray-500 mt-2">
+                Click camera icon to change
+              </p>
             </div>
 
             <div>
