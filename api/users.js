@@ -20,19 +20,34 @@ export default async function handler(req, res) {
     // Get authenticated user from cookie
     const user = await getUserFromRequest(req);
 
-    // PUT /api/users - Update user name
+    // PUT /api/users - Update user name and/or profile picture
     if (req.method === "PUT") {
-      const { name } = req.body;
+      const { name, profile_picture } = req.body;
 
-      if (!name) {
-        return res.status(400).json({ error: "Name is required" });
+      if (!name && profile_picture === undefined) {
+        return res.status(400).json({ error: "Name or profile_picture is required" });
       }
 
+      // Build dynamic update query
+      let updateFields = [];
+      let values = {};
+
+      if (name) {
+        updateFields.push('name');
+        values.name = name;
+      }
+
+      if (profile_picture !== undefined) {
+        updateFields.push('profile_picture');
+        values.profile_picture = profile_picture;
+      }
+
+      // Construct the SQL query dynamically
       const result = await sql`
         UPDATE users
-        SET name = ${name}
+        SET ${sql(values)}
         WHERE id = ${user.id}
-        RETURNING id, name, email
+        RETURNING id, name, email, profile_picture
       `;
 
       if (result.length === 0) {

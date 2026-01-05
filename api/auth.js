@@ -77,7 +77,7 @@ export default async function handler(req, res) {
       const result = await sql`
         INSERT INTO users (name, email, password)
         VALUES (${name}, ${email}, ${hashedPassword})
-        RETURNING id, name, email, created_at
+        RETURNING id, name, email, profile_picture, created_at
       `;
 
       const user = result[0];
@@ -102,6 +102,7 @@ export default async function handler(req, res) {
           id: user.id,
           name: user.name,
           email: user.email,
+          profile_picture: user.profile_picture,
         },
       });
     }
@@ -118,7 +119,7 @@ export default async function handler(req, res) {
 
       // Find user
       const result = await sql`
-        SELECT id, name, email, password FROM users
+        SELECT id, name, email, password, profile_picture FROM users
         WHERE email = ${email}
       `;
 
@@ -155,6 +156,7 @@ export default async function handler(req, res) {
           id: user.id,
           name: user.name,
           email: user.email,
+          profile_picture: user.profile_picture,
         },
       });
     }
@@ -192,7 +194,7 @@ export default async function handler(req, res) {
 
         // Get user
         const result = await sql`
-          SELECT id, name, email, created_at FROM users
+          SELECT id, name, email, profile_picture, created_at FROM users
           WHERE id = ${decoded.userId}
         `;
 

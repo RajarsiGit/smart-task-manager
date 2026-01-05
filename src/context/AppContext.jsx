@@ -215,11 +215,13 @@ export const AppProvider = ({ children }) => {
   const updateUserProfile = async (userData) => {
     try {
       if (useApi && user) {
-        const updated = await userApi.updateUser(userData.name);
+        const updated = await userApi.updateUser(userData);
         setUser(updated);
       } else {
-        storage.updateUser(userData);
-        setUser(userData);
+        // For localStorage, merge with existing user data
+        const updatedUser = { ...user, ...userData };
+        storage.updateUser(updatedUser);
+        setUser(updatedUser);
       }
     } catch (err) {
       console.error("Error updating user:", err);

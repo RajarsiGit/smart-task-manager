@@ -9,6 +9,8 @@ const ProfileSettings = () => {
   const { user, updateUserProfile, clearAllData, logout } = useApp();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
+  const [profilePicture, setProfilePicture] = useState(user?.profile_picture || null);
+  const [previewUrl, setPreviewUrl] = useState(user?.profile_picture || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -27,6 +29,8 @@ const ProfileSettings = () => {
           if (response.user) {
             setName(response.user.name || "");
             setEmail(response.user.email || "");
+            setProfilePicture(response.user.profile_picture || null);
+            setPreviewUrl(response.user.profile_picture || null);
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -34,6 +38,8 @@ const ProfileSettings = () => {
           if (user) {
             setName(user.name || "");
             setEmail(user.email || "");
+            setProfilePicture(user.profile_picture || null);
+            setPreviewUrl(user.profile_picture || null);
           }
         } finally {
           setIsLoading(false);
@@ -43,6 +49,8 @@ const ProfileSettings = () => {
         if (user) {
           setName(user.name || "");
           setEmail(user.email || "");
+          setProfilePicture(user.profile_picture || null);
+          setPreviewUrl(user.profile_picture || null);
         }
         setIsLoading(false);
       }
@@ -51,12 +59,40 @@ const ProfileSettings = () => {
     fetchUserData();
   }, [user]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Check file size (limit to 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert("Image size should be less than 2MB");
+        return;
+      }
+
+      // Check file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select an image file");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result;
+        setProfilePicture(base64String);
+        setPreviewUrl(base64String);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (name.trim()) {
       setIsSaving(true);
       try {
-        await updateUserProfile({ name: name.trim() });
+        await updateUserProfile({
+          name: name.trim(),
+          profile_picture: profilePicture
+        });
         navigate("/");
       } catch (error) {
         console.error("Error updating profile:", error);
@@ -138,20 +174,62 @@ const ProfileSettings = () => {
 
           {/* Profile Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center">
-                <svg
-                  className="w-10 h-10 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+            <div className="flex flex-col items-center justify-center mb-6">
+              <div className="relative">
+                <div className="w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center overflow-hidden">
+                  {previewUrl ? (
+                    <img
+                      src={previewUrl}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <svg
+                      className="w-12 h-12 text-white"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
+                </div>
+                <label
+                  htmlFor="profile-picture-input"
+                  className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition shadow-lg"
                 >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
-                  />
-                </svg>
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </label>
+                <input
+                  id="profile-picture-input"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
               </div>
+              <p className="text-xs text-gray-500 mt-2">Click camera icon to change</p>
             </div>
 
             <div>

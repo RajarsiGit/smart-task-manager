@@ -46,7 +46,7 @@ export async function getUserFromRequest(req) {
 
     // Get user from database
     const users = await sql`
-      SELECT id, name, email FROM users WHERE id = ${decoded.userId}
+      SELECT id, name, email, profile_picture FROM users WHERE id = ${decoded.userId}
     `;
 
     if (users.length === 0) {
@@ -72,7 +72,7 @@ export async function ensureUser(email, name = null) {
 
   // Try to find existing user
   const users = await sql`
-    SELECT id, name, email FROM users WHERE email = ${email}
+    SELECT id, name, email, profile_picture FROM users WHERE email = ${email}
   `;
 
   if (users.length > 0) {
@@ -83,7 +83,7 @@ export async function ensureUser(email, name = null) {
   const newUsers = await sql`
     INSERT INTO users (email, name, password)
     VALUES (${email}, ${name || email.split("@")[0]}, '')
-    RETURNING id, name, email
+    RETURNING id, name, email, profile_picture
   `;
 
   return newUsers[0];

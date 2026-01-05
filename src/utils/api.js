@@ -67,11 +67,11 @@ export const authApi = {
 // ============ USER API ============
 
 export const userApi = {
-  // Update user name
-  updateUser: async (name) => {
+  // Update user name and/or profile picture
+  updateUser: async (userData) => {
     return apiFetch("/users", {
       method: "PUT",
-      body: JSON.stringify({ name }),
+      body: JSON.stringify(userData),
     });
   },
 

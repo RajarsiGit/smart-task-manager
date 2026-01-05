@@ -173,21 +173,29 @@ const HomeScreen = () => {
                   </svg>
                 </button>
                 <button
-                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200"
+                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 overflow-hidden"
                   onClick={() => navigate("/profile")}
                   title="Profile"
                 >
-                  <svg
-                    className="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                      clipRule="evenodd"
+                  {user?.profile_picture ? (
+                    <img
+                      src={user.profile_picture}
+                      alt="Profile"
+                      className="w-6 h-6 rounded-full object-cover"
                     />
-                  </svg>
+                  ) : (
+                    <svg
+                      className="w-6 h-6"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  )}
                 </button>
                 <button
                   className="p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100"
@@ -449,21 +457,29 @@ const HomeScreen = () => {
                 </svg>
               </button>
               <button
-                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200"
+                className="p-2 bg-gray-100 rounded-full hover:bg-gray-200 overflow-hidden"
                 onClick={() => navigate("/profile")}
                 title="Profile"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
-                    clipRule="evenodd"
+                {user?.profile_picture ? (
+                  <img
+                    src={user.profile_picture}
+                    alt="Profile"
+                    className="w-6 h-6 rounded-full object-cover"
                   />
-                </svg>
+                ) : (
+                  <svg
+                    className="w-6 h-6"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                )}
               </button>
               <button
                 className="p-2 bg-red-50 text-red-600 rounded-full hover:bg-red-100"
