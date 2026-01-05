@@ -39,7 +39,15 @@ A beautiful and functional task management application built with React, Vite, a
   - No backend required
   - First-time setup screen to capture user name
 
+- **User Authentication**
+  - Secure login and registration with JWT tokens
+  - HTTP-only cookies for enhanced security
+  - Session expires after 1 hour for security
+  - Logout functionality to clear authentication
+
 - **Profile Management**
+  - Upload and edit profile picture (stored as base64, max 2MB)
+  - Profile picture displayed throughout the app
   - Update your display name anytime
   - Delete profile option to clear all data
   - Two-step confirmation to prevent accidental deletion
@@ -75,15 +83,18 @@ A beautiful and functional task management application built with React, Vite, a
    ```bash
    cp .env.example .env
    ```
-   Add your Neon database URL to `.env`:
+   Add your configuration to `.env`:
    ```
    DATABASE_URL=your_neon_connection_string
+   JWT_SECRET=your_secure_jwt_secret_key
+   VITE_USE_API=true
    ```
 
 3. **Initialize database:**
    - Login to [Neon Console](https://console.neon.tech)
    - Create a new project
-   - Run the SQL from `schema.sql` in the SQL Editor
+   - Run the SQL from `schema/schema.sql` in the SQL Editor
+   - If migrating from an older version, run migrations from `schema/migrations/`
 
 4. **Start development server:**
    ```bash
@@ -151,7 +162,14 @@ Use the tabs on the home screen to filter tasks:
 ### Profile Settings
 
 Access your profile settings by clicking the profile icon in the home screen header:
+- **Update Profile Picture**:
+  - Click the camera icon to upload a new profile picture
+  - Supports all common image formats (JPG, PNG, GIF, etc.)
+  - Maximum file size: 2MB
+  - Images are stored as base64 in the database
+  - Your profile picture appears throughout the app
 - **Update Name**: Change your display name
+- **Logout**: End your session and return to login screen
 - **Delete Profile**: Permanently delete your profile and all data
   - This removes all projects, tasks, and user information
   - Returns you to the welcome screen
@@ -169,10 +187,19 @@ Access your profile settings by clicking the profile icon in the home screen hea
 - **Vercel Serverless Functions** - API endpoints
 - **Neon Postgres** - Cloud database
 - **@neondatabase/serverless** - Database driver
+- **JWT (JSON Web Tokens)** - Authentication
+- **bcryptjs** - Password hashing
+- **HTTP-only Cookies** - Secure session management
 
 ### Data Persistence
 - **Cloud Database** - PostgreSQL on Neon (primary)
 - **localStorage** - Local fallback/migration support
+
+### Security
+- **JWT Authentication** - 1-hour session expiration
+- **Password Hashing** - bcrypt with salt rounds
+- **HTTP-only Cookies** - Protection against XSS attacks
+- **CORS Configuration** - Restricted to allowed origins
 
 ## Project Structure
 
@@ -184,8 +211,10 @@ src/
 │   ├── TaskDetailScreen.jsx     # Task create/edit form
 │   ├── CreateProject.jsx        # Project create/edit form
 │   ├── ProjectDetailScreen.jsx  # Project detail view
-│   ├── ProfileSettings.jsx      # User profile settings
-│   └── WelcomeScreen.jsx        # First-time setup screen
+│   ├── ProfileSettings.jsx      # User profile settings (with picture upload)
+│   ├── AuthScreen.jsx           # Login/Register screen
+│   ├── WelcomeScreen.jsx        # First-time setup screen (legacy)
+│   └── LoadingSpinner.jsx       # Loading indicator component
 ├── context/
 │   └── AppContext.jsx           # Global state management
 ├── utils/
@@ -195,10 +224,15 @@ src/
 ├── main.jsx                     # App entry point
 └── index.css                    # Global styles
 api/
-├── db.js                        # Neon database connection
-├── users.js                     # User management endpoint
+├── db.js                        # Neon database connection & auth helper
+├── auth.js                      # Authentication endpoints (login/register/logout)
+├── users.js                     # User management endpoint (update/delete)
 ├── projects.js                  # Projects CRUD endpoint
 └── tasks.js                     # Tasks CRUD endpoint
+schema/
+├── schema.sql                   # Complete database schema
+└── migrations/
+    └── 001_add_profile_picture.sql  # Profile picture column migration
 public/
 ├── favicon.svg                  # Custom app icon
 └── manifest.json                # PWA manifest
