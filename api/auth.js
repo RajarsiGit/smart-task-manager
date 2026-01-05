@@ -86,14 +86,14 @@ export default async function handler(req, res) {
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         JWT_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "1h" }
       );
 
       // Set httpOnly cookie
       res.setHeader(
         "Set-Cookie",
         `${COOKIE_NAME}=${token}; HttpOnly; Path=/; Max-Age=${
-          7 * 24 * 60 * 60
+          60 * 60
         }; SameSite=Lax`
       );
 
@@ -139,14 +139,14 @@ export default async function handler(req, res) {
       const token = jwt.sign(
         { userId: user.id, email: user.email },
         JWT_SECRET,
-        { expiresIn: "7d" }
+        { expiresIn: "1h" }
       );
 
       // Set httpOnly cookie
       res.setHeader(
         "Set-Cookie",
         `${COOKIE_NAME}=${token}; HttpOnly; Path=/; Max-Age=${
-          7 * 24 * 60 * 60
+          60 * 60
         }; SameSite=Lax`
       );
 

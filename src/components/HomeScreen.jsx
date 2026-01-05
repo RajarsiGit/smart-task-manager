@@ -491,39 +491,6 @@ const HomeScreen = () => {
             </h1>
             <p className="text-gray-500 text-sm mb-6">Have a nice day</p>
 
-            <div className="flex gap-4 border-b pb-4 mb-6">
-              <button
-                onClick={() => setActiveTab("all")}
-                className={`pb-2 ${
-                  activeTab === "all"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-gray-400"
-                }`}
-              >
-                My Tasks
-              </button>
-              <button
-                onClick={() => setActiveTab("progress")}
-                className={`pb-2 ${
-                  activeTab === "progress"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-gray-400"
-                }`}
-              >
-                In progress
-              </button>
-              <button
-                onClick={() => setActiveTab("completed")}
-                className={`pb-2 ${
-                  activeTab === "completed"
-                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
-                    : "text-gray-400"
-                }`}
-              >
-                Completed
-              </button>
-            </div>
-
             {/* Project Cards */}
             <div className="space-y-4">
               {projects.length === 0 ? (
@@ -622,7 +589,7 @@ const HomeScreen = () => {
           {/* Tasks Section */}
           <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">{getTaskSectionTitle()}</h2>
+              <h2 className="text-lg font-bold">All Tasks</h2>
               <button
                 onClick={() => navigate("/task/new")}
                 className="bg-purple-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-purple-700 transition"
@@ -630,6 +597,41 @@ const HomeScreen = () => {
                 + New Task
               </button>
             </div>
+
+            {/* Task Filter Tabs */}
+            <div className="flex gap-4 border-b pb-4 mb-4">
+              <button
+                onClick={() => setActiveTab("all")}
+                className={`pb-2 ${
+                  activeTab === "all"
+                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                My Tasks
+              </button>
+              <button
+                onClick={() => setActiveTab("progress")}
+                className={`pb-2 ${
+                  activeTab === "progress"
+                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                In progress
+              </button>
+              <button
+                onClick={() => setActiveTab("completed")}
+                className={`pb-2 ${
+                  activeTab === "completed"
+                    ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                Completed
+              </button>
+            </div>
+
             <div className="space-y-3">
               {filteredTasks.length === 0 ? (
                 <p className="text-gray-400 text-center py-4">No tasks found</p>
