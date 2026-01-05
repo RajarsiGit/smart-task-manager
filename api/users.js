@@ -30,24 +30,34 @@ export default async function handler(req, res) {
           .json({ error: "Name or profile_picture is required" });
       }
 
-      // Build dynamic update query
-      const values = {};
+      // Build dynamic update query based on what's provided
+      let result;
 
-      if (name) {
-        values.name = name;
+      if (name && profile_picture !== undefined) {
+        // Update both name and profile_picture
+        result = await sql`
+          UPDATE users
+          SET name = ${name}, profile_picture = ${profile_picture}
+          WHERE id = ${user.id}
+          RETURNING id, name, email, profile_picture
+        `;
+      } else if (name) {
+        // Update only name
+        result = await sql`
+          UPDATE users
+          SET name = ${name}
+          WHERE id = ${user.id}
+          RETURNING id, name, email, profile_picture
+        `;
+      } else {
+        // Update only profile_picture
+        result = await sql`
+          UPDATE users
+          SET profile_picture = ${profile_picture}
+          WHERE id = ${user.id}
+          RETURNING id, name, email, profile_picture
+        `;
       }
-
-      if (profile_picture !== undefined) {
-        values.profile_picture = profile_picture;
-      }
-
-      // Construct the SQL query dynamically
-      const result = await sql`
-        UPDATE users
-        SET ${sql(values)}
-        WHERE id = ${user.id}
-        RETURNING id, name, email, profile_picture
-      `;
 
       if (result.length === 0) {
         return res.status(404).json({ error: "User not found" });
