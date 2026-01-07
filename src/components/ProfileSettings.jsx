@@ -378,7 +378,7 @@ const ProfileSettings = () => {
           <div
             role="button"
             tabIndex={0}
-            className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50"
+            className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-[100]"
             onClick={() => setShowImageModal(false)}
             onKeyDown={(e) => {
               if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
@@ -388,14 +388,14 @@ const ProfileSettings = () => {
             }}
             aria-label="Close image preview"
           >
-            <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center animate-fadeIn">
+            <div className="relative max-w-md max-h-[70vh] w-full flex items-center justify-center animate-fadeIn">
               <button
                 onClick={() => setShowImageModal(false)}
-                className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition backdrop-blur-sm"
+                className="absolute -top-10 right-0 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition backdrop-blur-sm"
                 aria-label="Close modal"
               >
                 <svg
-                  className="w-6 h-6"
+                  className="w-5 h-5"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -411,7 +411,7 @@ const ProfileSettings = () => {
               <img
                 src={previewUrl}
                 alt="Profile preview"
-                className="max-w-full max-h-full object-contain rounded-2xl"
+                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               />
             </div>
