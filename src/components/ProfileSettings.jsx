@@ -375,45 +375,39 @@ const ProfileSettings = () => {
 
         {/* Image Preview Modal */}
         {showImageModal && previewUrl && (
-          <div
-            role="button"
-            tabIndex={0}
-            className="fixed inset-0 bg-black/95 flex items-center justify-center p-4 z-[100]"
-            onClick={() => setShowImageModal(false)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
-                e.preventDefault();
-                setShowImageModal(false);
-              }
-            }}
-            aria-label="Close image preview"
-          >
-            <div className="relative max-w-md max-h-[70vh] w-full flex items-center justify-center animate-fadeIn">
-              <button
-                onClick={() => setShowImageModal(false)}
-                className="absolute -top-10 right-0 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition backdrop-blur-sm"
-                aria-label="Close modal"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+          <div className="fixed inset-0 z-[100]">
+            {/* Backdrop */}
+            <div className="absolute inset-0 bg-black/50"></div>
+
+            {/* Content */}
+            <div className="relative h-full flex items-center justify-center p-4">
+              <div className="relative max-w-md max-h-[70vh] w-full flex items-center justify-center animate-fadeIn">
+                <button
+                  type="button"
+                  onClick={() => setShowImageModal(false)}
+                  className="absolute -top-10 right-0 bg-white/10 hover:bg-white/20 text-white p-2 rounded-full transition backdrop-blur-sm"
+                  aria-label="Close modal"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-              <img
-                src={previewUrl}
-                alt="Profile preview"
-                className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
-                onClick={(e) => e.stopPropagation()}
-              />
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+                <img
+                  src={previewUrl}
+                  alt="Profile preview"
+                  className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+                />
+              </div>
             </div>
           </div>
         )}
