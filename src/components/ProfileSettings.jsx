@@ -14,6 +14,7 @@ const ProfileSettings = () => {
   );
   const [previewUrl, setPreviewUrl] = useState(user?.profile_picture || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -178,7 +179,16 @@ const ProfileSettings = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="flex flex-col items-center justify-center mb-6">
               <div className="relative">
-                <div className="w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => previewUrl && setShowImageModal(true)}
+                  className={`w-24 h-24 bg-purple-600 rounded-full flex items-center justify-center overflow-hidden ${
+                    previewUrl
+                      ? "cursor-pointer hover:opacity-90 transition"
+                      : ""
+                  }`}
+                  aria-label="View profile picture"
+                >
                   {previewUrl ? (
                     <img
                       src={previewUrl}
@@ -198,10 +208,11 @@ const ProfileSettings = () => {
                       />
                     </svg>
                   )}
-                </div>
+                </button>
                 <label
                   htmlFor="profile-picture-input"
                   className="absolute bottom-0 right-0 bg-purple-600 text-white p-2 rounded-full cursor-pointer hover:bg-purple-700 transition shadow-lg"
+                  aria-label="Change profile picture"
                 >
                   <svg
                     className="w-4 h-4"
@@ -232,7 +243,9 @@ const ProfileSettings = () => {
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Click camera icon to change
+                {previewUrl
+                  ? "Click picture to view • Click camera to change"
+                  : "Click camera icon to add"}
               </p>
             </div>
 
@@ -356,6 +369,51 @@ const ProfileSettings = () => {
                   Delete
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Image Preview Modal */}
+        {showImageModal && previewUrl && (
+          <div
+            role="button"
+            tabIndex={0}
+            className="fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50"
+            onClick={() => setShowImageModal(false)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " " || e.key === "Escape") {
+                e.preventDefault();
+                setShowImageModal(false);
+              }
+            }}
+            aria-label="Close image preview"
+          >
+            <div className="relative max-w-4xl max-h-[90vh] w-full h-full flex items-center justify-center animate-fadeIn">
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white p-3 rounded-full transition backdrop-blur-sm"
+                aria-label="Close modal"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+              <img
+                src={previewUrl}
+                alt="Profile preview"
+                className="max-w-full max-h-full object-contain rounded-2xl"
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
           </div>
         )}
