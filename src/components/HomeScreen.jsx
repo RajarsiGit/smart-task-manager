@@ -40,7 +40,7 @@ const HomeScreen = () => {
           ]);
           setProjects(projectsData);
           setTasks(tasksData);
-        } catch (error) {
+        } catch {
           // Keep existing data on error
         } finally {
           setIsRefreshing(false);
@@ -54,17 +54,28 @@ const HomeScreen = () => {
   const filteredTasks = tasks.filter((task) => {
     // First filter by active tab
     let passesTabFilter = true;
-    if (activeTab === "progress") passesTabFilter = task.status === "in_progress";
-    else if (activeTab === "completed") passesTabFilter = task.status === "completed";
+    if (activeTab === "progress")
+      passesTabFilter = task.status === "in_progress";
+    else if (activeTab === "completed")
+      passesTabFilter = task.status === "completed";
 
     // Then filter by search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const matchesTitle = task.title?.toLowerCase().includes(query);
-      const matchesDescription = task.description?.toLowerCase().includes(query);
-      const matchesTags = task.tags?.some(tag => tag.toLowerCase().includes(query));
-      const matchesCategories = task.categories?.some(cat => cat.toLowerCase().includes(query));
-      return passesTabFilter && (matchesTitle || matchesDescription || matchesTags || matchesCategories);
+      const matchesDescription = task.description
+        ?.toLowerCase()
+        .includes(query);
+      const matchesTags = task.tags?.some((tag) =>
+        tag.toLowerCase().includes(query)
+      );
+      const matchesCategories = task.categories?.some((cat) =>
+        cat.toLowerCase().includes(query)
+      );
+      return (
+        passesTabFilter &&
+        (matchesTitle || matchesDescription || matchesTags || matchesCategories)
+      );
     }
 
     return passesTabFilter;
@@ -121,7 +132,7 @@ const HomeScreen = () => {
         await removeProject(projectToDelete);
         setShowDeleteModal(false);
         setProjectToDelete(null);
-      } catch (error) {
+      } catch {
         alert("Failed to delete project. Please try again.");
       } finally {
         setIsDeleting(false);
@@ -149,7 +160,7 @@ const HomeScreen = () => {
     setIsLoggingOut(true);
     try {
       await logout();
-    } catch (error) {
+    } catch {
       alert("Failed to logout. Please try again.");
     } finally {
       setIsLoggingOut(false);
@@ -173,7 +184,9 @@ const HomeScreen = () => {
                 <h1 className="text-3xl font-bold mb-1 dark:text-white">
                   Hello {user?.name || "User"}!
                 </h1>
-                <p className="text-gray-500 dark:text-gray-400">Have a nice day</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Have a nice day
+                </p>
               </div>
               <div className="flex gap-4">
                 <button
@@ -210,7 +223,9 @@ const HomeScreen = () => {
                 <button
                   className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
                   onClick={toggleTheme}
-                  title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                  title={`Switch to ${
+                    theme === "light" ? "dark" : "light"
+                  } mode`}
                 >
                   {theme === "light" ? (
                     <svg
@@ -318,7 +333,11 @@ const HomeScreen = () => {
                     className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     aria-label="Clear search"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-5 h-5"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -354,22 +373,13 @@ const HomeScreen = () => {
                   {filteredProjects.map((project) => (
                     <div
                       key={project.id}
-                      role="button"
-                      tabIndex={0}
-                      className={`${project.color} rounded-2xl p-6 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
-                      onClick={() => navigate(`/project/${project.id}/view`)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          navigate(`/project/${project.id}/view`);
-                        }
-                      }}
-                      aria-label={`View ${project.title} project`}
+                      className={`${project.color} rounded-2xl transform transition hover:scale-105 relative group overflow-hidden`}
                     >
-                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition z-10">
                         <button
                           onClick={(e) => handleEditProject(e, project.id)}
                           className="bg-white/20 p-2 rounded hover:bg-white/30"
+                          aria-label={`Edit ${project.title}`}
                         >
                           <svg
                             className="w-5 h-5"
@@ -388,6 +398,7 @@ const HomeScreen = () => {
                         <button
                           onClick={(e) => handleDeleteProject(e, project.id)}
                           className="bg-white/20 p-2 rounded hover:bg-red-500"
+                          aria-label={`Delete ${project.title}`}
                         >
                           <svg
                             className="w-5 h-5"
@@ -404,28 +415,35 @@ const HomeScreen = () => {
                           </svg>
                         </button>
                       </div>
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="bg-white/20 p-2 rounded">
-                          <svg
-                            className="w-5 h-5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                          </svg>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/project/${project.id}/view`)}
+                        className="w-full p-6 text-white text-left"
+                        aria-label={`View ${project.title} project`}
+                      >
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="bg-white/20 p-2 rounded">
+                            <svg
+                              className="w-5 h-5"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                            </svg>
+                          </div>
+                          <span className="text-sm opacity-90">
+                            {project.name}
+                          </span>
                         </div>
-                        <span className="text-sm opacity-90">
-                          {project.name}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-semibold mb-2">
-                        {project.title}
-                      </h3>
-                      {project.date && (
-                        <p className="text-sm opacity-75">
-                          {formatDate(project.date)}
-                        </p>
-                      )}
+                        <h3 className="text-xl font-semibold mb-2">
+                          {project.title}
+                        </h3>
+                        {project.date && (
+                          <p className="text-sm opacity-75">
+                            {formatDate(project.date)}
+                          </p>
+                        )}
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -672,7 +690,11 @@ const HomeScreen = () => {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                     aria-label="Clear search"
                   >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-4 h-4"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path
                         fillRule="evenodd"
                         d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -704,22 +726,13 @@ const HomeScreen = () => {
                 filteredProjects.map((project) => (
                   <div
                     key={project.id}
-                    role="button"
-                    tabIndex={0}
-                    className={`${project.color} rounded-2xl p-5 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
-                    onClick={() => navigate(`/project/${project.id}/view`)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        navigate(`/project/${project.id}/view`);
-                      }
-                    }}
-                    aria-label={`View ${project.title} project`}
+                    className={`${project.color} rounded-2xl transform transition hover:scale-105 relative group overflow-hidden`}
                   >
-                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition z-10">
                       <button
                         onClick={(e) => handleEditProject(e, project.id)}
                         className="bg-white/20 p-1.5 rounded hover:bg-white/30"
+                        aria-label={`Edit ${project.title}`}
                       >
                         <svg
                           className="w-4 h-4"
@@ -738,6 +751,7 @@ const HomeScreen = () => {
                       <button
                         onClick={(e) => handleDeleteProject(e, project.id)}
                         className="bg-white/20 p-1.5 rounded hover:bg-red-500"
+                        aria-label={`Delete ${project.title}`}
                       >
                         <svg
                           className="w-4 h-4"
@@ -754,26 +768,35 @@ const HomeScreen = () => {
                         </svg>
                       </button>
                     </div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="bg-white/20 p-1.5 rounded">
-                        <svg
-                          className="w-4 h-4"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-                        </svg>
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/project/${project.id}/view`)}
+                      className="w-full p-5 text-white text-left"
+                      aria-label={`View ${project.title} project`}
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="bg-white/20 p-1.5 rounded">
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+                          </svg>
+                        </div>
+                        <span className="text-sm opacity-90">
+                          {project.name}
+                        </span>
                       </div>
-                      <span className="text-sm opacity-90">{project.name}</span>
-                    </div>
-                    <h3 className="text-lg font-semibold mb-2">
-                      {project.title}
-                    </h3>
-                    {project.date && (
-                      <p className="text-sm opacity-75">
-                        {formatDate(project.date)}
-                      </p>
-                    )}
+                      <h3 className="text-lg font-semibold mb-2">
+                        {project.title}
+                      </h3>
+                      {project.date && (
+                        <p className="text-sm opacity-75">
+                          {formatDate(project.date)}
+                        </p>
+                      )}
+                    </button>
                   </div>
                 ))
               )}
@@ -794,7 +817,8 @@ const HomeScreen = () => {
           <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-6">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-bold">
-                {getTaskSectionTitle()} {searchQuery && `(${filteredTasks.length})`}
+                {getTaskSectionTitle()}{" "}
+                {searchQuery && `(${filteredTasks.length})`}
               </h2>
               <button
                 onClick={() => navigate("/task/new")}

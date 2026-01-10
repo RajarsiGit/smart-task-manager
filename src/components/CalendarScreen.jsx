@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import { tasksApi, projectsApi } from "../utils/api";
+import { tasksApi } from "../utils/api";
 import LoadingSpinner from "./LoadingSpinner";
 
 const CalendarScreen = () => {
@@ -13,11 +13,9 @@ const CalendarScreen = () => {
     setSelectedDate,
     loading,
     setTasks,
-    setProjects,
   } = useApp();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarDates, setCalendarDates] = useState([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFetchingDateTasks, setIsFetchingDateTasks] = useState(false);
   const [isFetchingMonth, setIsFetchingMonth] = useState(false);
 
@@ -37,7 +35,7 @@ const CalendarScreen = () => {
         try {
           const tasksData = await tasksApi.getAll();
           setTasks(tasksData);
-        } catch (error) {
+        } catch {
           // Silent error - keep existing tasks
         } finally {
           setIsFetchingDateTasks(false);
@@ -58,7 +56,7 @@ const CalendarScreen = () => {
         try {
           const tasksData = await tasksApi.getAll();
           setTasks(tasksData);
-        } catch (error) {
+        } catch {
           // Silent error - keep existing tasks
         } finally {
           setIsFetchingMonth(false);
@@ -133,7 +131,7 @@ const CalendarScreen = () => {
     return projects.find((p) => p.id === taskProjectId);
   };
 
-  if (loading || isRefreshing) {
+  if (loading) {
     return <LoadingSpinner fullScreen />;
   }
 

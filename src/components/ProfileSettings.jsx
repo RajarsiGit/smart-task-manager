@@ -38,7 +38,7 @@ const ProfileSettings = () => {
             setProfilePicture(response.user.profile_picture || null);
             setPreviewUrl(response.user.profile_picture || null);
           }
-        } catch (error) {
+        } catch {
           // Fallback to context user data
           if (user) {
             setName(user.name || "");
@@ -99,7 +99,7 @@ const ProfileSettings = () => {
           profile_picture: profilePicture,
         });
         navigate("/");
-      } catch (error) {
+      } catch {
         alert("Failed to update profile. Please try again.");
       } finally {
         setIsSaving(false);
@@ -116,7 +116,7 @@ const ProfileSettings = () => {
     try {
       await clearAllData();
       setShowDeleteModal(false);
-    } catch (error) {
+    } catch {
       alert("Failed to delete profile. Please try again.");
       setIsDeleting(false);
     }
@@ -131,7 +131,7 @@ const ProfileSettings = () => {
     try {
       await logout();
       // No need to navigate - user state change will trigger AuthScreen
-    } catch (error) {
+    } catch {
       alert("Failed to logout. Please try again.");
     } finally {
       setIsLoggingOut(false);
@@ -170,7 +170,7 @@ const ProfileSettings = () => {
       URL.revokeObjectURL(url);
 
       setShowExportSuccessModal(true);
-    } catch (error) {
+    } catch {
       setShowExportErrorModal(true);
     }
   };
@@ -506,7 +506,8 @@ const ProfileSettings = () => {
                 Export Successful!
               </h3>
               <p className="text-gray-600 text-center mb-6">
-                Your data has been exported successfully. Check your downloads folder.
+                Your data has been exported successfully. Check your downloads
+                folder.
               </p>
               <button
                 onClick={() => setShowExportSuccessModal(false)}
