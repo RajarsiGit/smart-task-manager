@@ -16,6 +16,8 @@ const ProfileSettings = () => {
   const [previewUrl, setPreviewUrl] = useState(user?.profile_picture || null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [showExportSuccessModal, setShowExportSuccessModal] = useState(false);
+  const [showExportErrorModal, setShowExportErrorModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -167,9 +169,9 @@ const ProfileSettings = () => {
       link.remove();
       URL.revokeObjectURL(url);
 
-      alert("Data exported successfully!");
+      setShowExportSuccessModal(true);
     } catch (error) {
-      alert("Failed to export data. Please try again.");
+      setShowExportErrorModal(true);
     }
   };
 
@@ -475,6 +477,80 @@ const ProfileSettings = () => {
                   className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
                 />
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Export Success Modal */}
+        {showExportSuccessModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-center mb-2">
+                Export Successful!
+              </h3>
+              <p className="text-gray-600 text-center mb-6">
+                Your data has been exported successfully. Check your downloads folder.
+              </p>
+              <button
+                onClick={() => setShowExportSuccessModal(false)}
+                className="w-full px-4 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Export Error Modal */}
+        {showExportErrorModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-center mb-2">
+                Export Failed
+              </h3>
+              <p className="text-gray-600 text-center mb-6">
+                Failed to export data. Please try again.
+              </p>
+              <button
+                onClick={() => setShowExportErrorModal(false)}
+                className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+              >
+                OK
+              </button>
             </div>
           </div>
         )}
