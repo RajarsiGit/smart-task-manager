@@ -210,7 +210,6 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
-    console.error("Auth API Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }

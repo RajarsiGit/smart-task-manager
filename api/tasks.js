@@ -70,6 +70,7 @@ export default async function handler(req, res) {
         tags,
         categories,
         status,
+        priority,
       } = req.body;
 
       if (!title || !date) {
@@ -87,7 +88,8 @@ export default async function handler(req, res) {
           end_time,
           status,
           tags,
-          categories
+          categories,
+          priority
         )
         VALUES (
           ${user.id},
@@ -99,7 +101,8 @@ export default async function handler(req, res) {
           ${endTime || null},
           ${status || "pending"},
           ${tags || []},
-          ${categories || []}
+          ${categories || []},
+          ${priority || "medium"}
         )
         RETURNING *
       `;
@@ -120,6 +123,7 @@ export default async function handler(req, res) {
         tags,
         categories,
         status,
+        priority,
       } = req.body;
 
       if (!id) {
@@ -137,7 +141,8 @@ export default async function handler(req, res) {
           project_id = COALESCE(${projectId}, project_id),
           status = COALESCE(${status}, status),
           tags = COALESCE(${tags}, tags),
-          categories = COALESCE(${categories}, categories)
+          categories = COALESCE(${categories}, categories),
+          priority = COALESCE(${priority}, priority)
         WHERE id = ${id} AND user_id = ${user.id}
         RETURNING *
       `;
@@ -174,7 +179,6 @@ export default async function handler(req, res) {
 
     return res.status(405).json({ error: "Method not allowed" });
   } catch (error) {
-    console.error("API Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }

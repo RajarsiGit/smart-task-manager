@@ -28,7 +28,7 @@ const ProjectDetailScreen = () => {
           setProjects(projectsData);
           setTasks(tasksData);
         } catch (error) {
-          console.error("Error refreshing data:", error);
+          // Silent error - keep existing data
         } finally {
           setIsRefreshing(false);
         }
@@ -69,7 +69,6 @@ const ProjectDetailScreen = () => {
       setShowDeleteModal(false);
       navigate("/");
     } catch (error) {
-      console.error("Error deleting project:", error);
       alert("Failed to delete project. Please try again.");
       setIsDeleting(false);
     }

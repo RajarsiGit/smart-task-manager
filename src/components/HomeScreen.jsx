@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
+import { useTheme } from "../context/ThemeContext";
 import { projectsApi, tasksApi } from "../utils/api";
 import LoadingSpinner from "./LoadingSpinner";
 
@@ -16,12 +17,14 @@ const HomeScreen = () => {
     setTasks,
     logout,
   } = useApp();
+  const { theme, toggleTheme } = useTheme();
   const [activeTab, setActiveTab] = useState("all");
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [projectToDelete, setProjectToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch fresh data from API when component mounts
   useEffect(() => {
@@ -38,7 +41,6 @@ const HomeScreen = () => {
           setProjects(projectsData);
           setTasks(tasksData);
         } catch (error) {
-          console.error("Error refreshing data:", error);
           // Keep existing data on error
         } finally {
           setIsRefreshing(false);
@@ -50,10 +52,31 @@ const HomeScreen = () => {
   }, []); // Only run on mount
 
   const filteredTasks = tasks.filter((task) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "progress") return task.status === "in_progress";
-    if (activeTab === "completed") return task.status === "completed";
-    return false;
+    // First filter by active tab
+    let passesTabFilter = true;
+    if (activeTab === "progress") passesTabFilter = task.status === "in_progress";
+    else if (activeTab === "completed") passesTabFilter = task.status === "completed";
+
+    // Then filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      const matchesTitle = task.title?.toLowerCase().includes(query);
+      const matchesDescription = task.description?.toLowerCase().includes(query);
+      const matchesTags = task.tags?.some(tag => tag.toLowerCase().includes(query));
+      const matchesCategories = task.categories?.some(cat => cat.toLowerCase().includes(query));
+      return passesTabFilter && (matchesTitle || matchesDescription || matchesTags || matchesCategories);
+    }
+
+    return passesTabFilter;
+  });
+
+  const filteredProjects = projects.filter((project) => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      project.name?.toLowerCase().includes(query) ||
+      project.title?.toLowerCase().includes(query)
+    );
   });
 
   const formatDate = (dateString) => {
@@ -72,6 +95,19 @@ const HomeScreen = () => {
     return projects.find((p) => p.id === taskProjectId);
   };
 
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case "high":
+        return "bg-red-500";
+      case "medium":
+        return "bg-yellow-500";
+      case "low":
+        return "bg-blue-500";
+      default:
+        return "bg-gray-400";
+    }
+  };
+
   const handleDeleteProject = (e, projectId) => {
     e.stopPropagation();
     setProjectToDelete(projectId);
@@ -86,7 +122,6 @@ const HomeScreen = () => {
         setShowDeleteModal(false);
         setProjectToDelete(null);
       } catch (error) {
-        console.error("Error deleting project:", error);
         alert("Failed to delete project. Please try again.");
       } finally {
         setIsDeleting(false);
@@ -115,7 +150,6 @@ const HomeScreen = () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Error logging out:", error);
       alert("Failed to logout. Please try again.");
     } finally {
       setIsLoggingOut(false);
@@ -132,14 +166,14 @@ const HomeScreen = () => {
       <div className="w-full max-w-7xl mx-auto">
         {/* Desktop Layout */}
         <div className="hidden lg:block">
-          <div className="bg-white rounded-3xl shadow-xl p-8 mb-8">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-8 mb-8 transition-colors">
             {/* Header */}
-            <div className="flex justify-between items-center mb-8">
+            <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-3xl font-bold mb-1">
+                <h1 className="text-3xl font-bold mb-1 dark:text-white">
                   Hello {user?.name || "User"}!
                 </h1>
-                <p className="text-gray-500">Have a nice day</p>
+                <p className="text-gray-500 dark:text-gray-400">Have a nice day</p>
               </div>
               <div className="flex gap-4">
                 <button
@@ -155,11 +189,12 @@ const HomeScreen = () => {
                   + New Task
                 </button>
                 <button
-                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200"
+                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
                   onClick={() => navigate("/calendar")}
+                  title="Calendar"
                 >
                   <svg
-                    className="w-6 h-6"
+                    className="w-6 h-6 dark:text-white"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -173,7 +208,42 @@ const HomeScreen = () => {
                   </svg>
                 </button>
                 <button
-                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 overflow-hidden"
+                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  onClick={toggleTheme}
+                  title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+                >
+                  {theme === "light" ? (
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="w-6 h-6 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                      />
+                    </svg>
+                  )}
+                </button>
+                <button
+                  className="p-3 bg-gray-100 rounded-xl hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 overflow-hidden"
                   onClick={() => navigate("/profile")}
                   title="Profile"
                 >
@@ -219,27 +289,81 @@ const HomeScreen = () => {
               </div>
             </div>
 
+            {/* Search Bar */}
+            <div className="mb-8">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search projects and tasks..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-12 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 transition-colors"
+                />
+                <svg
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    aria-label="Clear search"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
+
             {/* Projects Section */}
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-6">Projects</h2>
-              {projects.length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-2xl">
-                  <p className="text-gray-400 mb-4">No projects yet</p>
-                  <button
-                    onClick={() => navigate("/project/new")}
-                    className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition"
-                  >
-                    Create Your First Project
-                  </button>
+              <h2 className="text-2xl font-bold mb-6 dark:text-white">
+                Projects {searchQuery && `(${filteredProjects.length})`}
+              </h2>
+              {filteredProjects.length === 0 ? (
+                <div className="text-center py-12 bg-gray-50 dark:bg-gray-700 rounded-2xl">
+                  <p className="text-gray-400 mb-4">
+                    {searchQuery ? "No projects found" : "No projects yet"}
+                  </p>
+                  {!searchQuery && (
+                    <button
+                      onClick={() => navigate("/project/new")}
+                      className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition"
+                    >
+                      Create Your First Project
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {projects.map((project) => (
-                    <button
+                  {filteredProjects.map((project) => (
+                    <div
                       key={project.id}
-                      type="button"
+                      role="button"
+                      tabIndex={0}
                       className={`${project.color} rounded-2xl p-6 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
                       onClick={() => navigate(`/project/${project.id}/view`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          navigate(`/project/${project.id}/view`);
+                        }
+                      }}
                       aria-label={`View ${project.title} project`}
                     >
                       <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
@@ -302,7 +426,7 @@ const HomeScreen = () => {
                           {formatDate(project.date)}
                         </p>
                       )}
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -311,7 +435,9 @@ const HomeScreen = () => {
             {/* Tasks Section */}
             <div>
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Tasks</h2>
+                <h2 className="text-2xl font-bold dark:text-white">
+                  Tasks {searchQuery && `(${filteredTasks.length})`}
+                </h2>
                 <div className="flex gap-2">
                   <button
                     onClick={() => setActiveTab("all")}
@@ -362,18 +488,28 @@ const HomeScreen = () => {
                         onClick={() => navigate(`/task/${task.id}`)}
                         aria-label={`View task: ${task.title}`}
                       >
-                        <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
-                          <svg
-                            className="w-6 h-6 text-white"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path
-                              fillRule="evenodd"
-                              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
+                        <div className="relative">
+                          <div className="bg-purple-600 w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <svg
+                              className="w-6 h-6 text-white"
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                          {task.priority && (
+                            <div
+                              className={`absolute -top-1 -right-1 w-4 h-4 ${getPriorityColor(
+                                task.priority
+                              )} rounded-full border-2 border-white`}
+                              title={`${task.priority} priority`}
+                            ></div>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <span className="text-gray-700 font-medium block truncate">
@@ -505,27 +641,79 @@ const HomeScreen = () => {
             <h1 className="text-2xl font-bold mb-1">
               Hello {user?.name || "User"}!
             </h1>
-            <p className="text-gray-500 text-sm mb-6">Have a nice day</p>
+            <p className="text-gray-500 text-sm mb-4">Have a nice day</p>
+
+            {/* Search Bar */}
+            <div className="mb-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 text-sm"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label="Clear search"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </div>
 
             {/* Project Cards */}
             <div className="space-y-4">
-              {projects.length === 0 ? (
+              {filteredProjects.length === 0 ? (
                 <div className="text-center py-8">
-                  <p className="text-gray-400 mb-4">No projects yet</p>
-                  <button
-                    onClick={() => navigate("/project/new")}
-                    className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition"
-                  >
-                    Create Your First Project
-                  </button>
+                  <p className="text-gray-400 mb-4">
+                    {searchQuery ? "No projects found" : "No projects yet"}
+                  </p>
+                  {!searchQuery && (
+                    <button
+                      onClick={() => navigate("/project/new")}
+                      className="bg-purple-600 text-white px-4 py-2 rounded-xl hover:bg-purple-700 transition"
+                    >
+                      Create Your First Project
+                    </button>
+                  )}
                 </div>
               ) : (
-                projects.map((project) => (
-                  <button
+                filteredProjects.map((project) => (
+                  <div
                     key={project.id}
-                    type="button"
+                    role="button"
+                    tabIndex={0}
                     className={`${project.color} rounded-2xl p-5 text-white cursor-pointer transform transition hover:scale-105 relative group text-left w-full`}
                     onClick={() => navigate(`/project/${project.id}/view`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        navigate(`/project/${project.id}/view`);
+                      }
+                    }}
                     aria-label={`View ${project.title} project`}
                   >
                     <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition">
@@ -586,7 +774,7 @@ const HomeScreen = () => {
                         {formatDate(project.date)}
                       </p>
                     )}
-                  </button>
+                  </div>
                 ))
               )}
             </div>
@@ -605,7 +793,9 @@ const HomeScreen = () => {
           {/* Tasks Section */}
           <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-bold">All Tasks</h2>
+              <h2 className="text-lg font-bold">
+                {getTaskSectionTitle()} {searchQuery && `(${filteredTasks.length})`}
+              </h2>
               <button
                 onClick={() => navigate("/task/new")}
                 className="bg-purple-600 text-white px-3 py-1.5 rounded-full text-sm hover:bg-purple-700 transition"
@@ -662,18 +852,28 @@ const HomeScreen = () => {
                       onClick={() => navigate(`/task/${task.id}`)}
                       aria-label={`View task: ${task.title}`}
                     >
-                      <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg
-                          className="w-5 h-5 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
+                      <div className="relative">
+                        <div className="bg-purple-600 w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0">
+                          <svg
+                            className="w-5 h-5 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </div>
+                        {task.priority && (
+                          <div
+                            className={`absolute -top-1 -right-1 w-3 h-3 ${getPriorityColor(
+                              task.priority
+                            )} rounded-full border-2 border-white`}
+                            title={`${task.priority} priority`}
+                          ></div>
+                        )}
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="text-gray-700 font-medium block truncate">

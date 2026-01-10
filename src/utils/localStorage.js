@@ -91,6 +91,7 @@ export const addTask = (task) => {
     id: Date.now(),
     date: task.date || new Date().toISOString(),
     status: task.status || "pending",
+    priority: task.priority || "medium",
   };
   tasks.push(newTask);
   localStorage.setItem(STORAGE_KEYS.TASKS, JSON.stringify(tasks));

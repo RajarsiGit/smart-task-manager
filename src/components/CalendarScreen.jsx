@@ -38,7 +38,7 @@ const CalendarScreen = () => {
           const tasksData = await tasksApi.getAll();
           setTasks(tasksData);
         } catch (error) {
-          console.error("Error fetching tasks for date:", error);
+          // Silent error - keep existing tasks
         } finally {
           setIsFetchingDateTasks(false);
         }
@@ -59,7 +59,7 @@ const CalendarScreen = () => {
           const tasksData = await tasksApi.getAll();
           setTasks(tasksData);
         } catch (error) {
-          console.error("Error fetching tasks for month:", error);
+          // Silent error - keep existing tasks
         } finally {
           setIsFetchingMonth(false);
         }

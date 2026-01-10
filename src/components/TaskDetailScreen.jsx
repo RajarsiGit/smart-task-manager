@@ -36,6 +36,7 @@ const TaskDetailScreen = () => {
     tags: [],
     categories: [],
     status: "in_progress",
+    priority: "medium",
     projectId: projectIdFromQuery ? Number.parseInt(projectIdFromQuery) : null,
   });
 
@@ -78,7 +79,6 @@ const TaskDetailScreen = () => {
         if (useApi) {
           setIsLoading(true);
           try {
-            console.log("Fetching task from API:", id);
             const task = await tasksApi.getById(id);
 
             if (task) {
@@ -91,11 +91,11 @@ const TaskDetailScreen = () => {
                 tags: task.tags || [],
                 categories: task.categories || [],
                 status: task.status || "pending",
+                priority: task.priority || "medium",
                 projectId: task.projectId || task.project_id || null,
               });
             }
           } catch (error) {
-            console.error("Error fetching task from API:", error);
             // Fallback to tasks from context
             const task = tasks.find((t) => t.id === Number.parseInt(id));
             if (task) {
@@ -108,6 +108,7 @@ const TaskDetailScreen = () => {
                 tags: task.tags || [],
                 categories: task.categories || [],
                 status: task.status || "pending",
+                priority: task.priority || "medium",
                 projectId: task.projectId || null,
               });
             }
@@ -127,6 +128,7 @@ const TaskDetailScreen = () => {
               tags: task.tags || [],
               categories: task.categories || [],
               status: task.status || "pending",
+              priority: task.priority || "medium",
               projectId: task.projectId || null,
             });
           }
@@ -199,7 +201,6 @@ const TaskDetailScreen = () => {
       }
       navigate("/");
     } catch (error) {
-      console.error("Error saving task:", error);
       alert("Failed to save task. Please try again.");
     } finally {
       setIsSaving(false);
@@ -217,7 +218,6 @@ const TaskDetailScreen = () => {
       setShowDeleteModal(false);
       navigate("/");
     } catch (error) {
-      console.error("Error deleting task:", error);
       alert("Failed to delete task. Please try again.");
       setIsDeleting(false);
     }
@@ -229,6 +229,10 @@ const TaskDetailScreen = () => {
 
   const setStatus = (status) => {
     setFormData((prev) => ({ ...prev, status }));
+  };
+
+  const setPriority = (priority) => {
+    setFormData((prev) => ({ ...prev, priority }));
   };
 
   return (
@@ -555,6 +559,46 @@ const TaskDetailScreen = () => {
                 className="px-4 py-2 bg-white/20 rounded-xl text-sm hover:bg-white/30"
               >
                 Add
+              </button>
+            </div>
+          </fieldset>
+
+          {/* Priority */}
+          <fieldset className="mb-6">
+            <legend className="text-sm opacity-75 mb-2 block">Priority</legend>
+            <div className="grid grid-cols-3 gap-3">
+              <button
+                type="button"
+                onClick={() => setPriority("low")}
+                className={`py-3 rounded-xl font-semibold transition ${
+                  formData.priority === "low"
+                    ? "bg-blue-500 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                }`}
+              >
+                Low
+              </button>
+              <button
+                type="button"
+                onClick={() => setPriority("medium")}
+                className={`py-3 rounded-xl font-semibold transition ${
+                  formData.priority === "medium"
+                    ? "bg-yellow-500 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                }`}
+              >
+                Medium
+              </button>
+              <button
+                type="button"
+                onClick={() => setPriority("high")}
+                className={`py-3 rounded-xl font-semibold transition ${
+                  formData.priority === "high"
+                    ? "bg-red-500 text-white"
+                    : "bg-white/20 text-white hover:bg-white/30"
+                }`}
+              >
+                High
               </button>
             </div>
           </fieldset>

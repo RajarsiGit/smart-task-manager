@@ -6,7 +6,8 @@ import LoadingSpinner from "./LoadingSpinner";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const { user, updateUserProfile, clearAllData, logout } = useApp();
+  const { user, updateUserProfile, clearAllData, logout, projects, tasks } =
+    useApp();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [profilePicture, setProfilePicture] = useState(
@@ -36,7 +37,6 @@ const ProfileSettings = () => {
             setPreviewUrl(response.user.profile_picture || null);
           }
         } catch (error) {
-          console.error("Error fetching user data:", error);
           // Fallback to context user data
           if (user) {
             setName(user.name || "");
@@ -98,7 +98,6 @@ const ProfileSettings = () => {
         });
         navigate("/");
       } catch (error) {
-        console.error("Error updating profile:", error);
         alert("Failed to update profile. Please try again.");
       } finally {
         setIsSaving(false);
@@ -116,7 +115,6 @@ const ProfileSettings = () => {
       await clearAllData();
       setShowDeleteModal(false);
     } catch (error) {
-      console.error("Error deleting profile:", error);
       alert("Failed to delete profile. Please try again.");
       setIsDeleting(false);
     }
@@ -132,10 +130,46 @@ const ProfileSettings = () => {
       await logout();
       // No need to navigate - user state change will trigger AuthScreen
     } catch (error) {
-      console.error("Error logging out:", error);
       alert("Failed to logout. Please try again.");
     } finally {
       setIsLoggingOut(false);
+    }
+  };
+
+  const handleExportData = () => {
+    try {
+      // Create export object with all user data
+      const exportData = {
+        user: {
+          name: user?.name,
+          email: user?.email,
+          // Don't include profile picture in export to keep file size reasonable
+        },
+        projects: projects,
+        tasks: tasks,
+        exportDate: new Date().toISOString(),
+        version: "1.0",
+      };
+
+      // Convert to JSON string
+      const jsonString = JSON.stringify(exportData, null, 2);
+
+      // Create blob and download
+      const blob = new Blob([jsonString], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `smart-task-manager-export-${
+        new Date().toISOString().split("T")[0]
+      }.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+
+      alert("Data exported successfully!");
+    } catch (error) {
+      alert("Failed to export data. Please try again.");
     }
   };
 
@@ -303,6 +337,39 @@ const ProfileSettings = () => {
             >
               Logout
             </button>
+          </div>
+
+          {/* Data Export */}
+          <div className="mt-6">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h3 className="text-sm font-medium text-gray-700 mb-2">
+                Export Your Data
+              </h3>
+              <p className="text-sm text-gray-600 mb-3">
+                Download all your projects and tasks as a JSON file for backup
+                or migration.
+              </p>
+              <button
+                type="button"
+                onClick={handleExportData}
+                className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                Export Data
+              </button>
+            </div>
           </div>
 
           {/* Account Deletion */}

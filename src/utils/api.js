@@ -27,7 +27,6 @@ async function apiFetch(endpoint, options = {}) {
 
     return await response.json();
   } catch (error) {
-    console.error("API Error:", error);
     throw error;
   }
 }
@@ -222,7 +221,6 @@ export async function migrateLocalStorageToDb() {
       migratedTasks: tasks.length,
     };
   } catch (error) {
-    console.error("Migration error:", error);
     throw error;
   }
 }

@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
+import { ThemeProvider } from "./context/ThemeContext";
 import HomeScreen from "./components/HomeScreen";
 import CalendarScreen from "./components/CalendarScreen";
 import TaskDetailScreen from "./components/TaskDetailScreen";
@@ -29,7 +30,7 @@ function AppContent() {
 
   return (
     <Router>
-      <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8">
+      <div className="min-h-screen flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 bg-white dark:bg-gray-900 transition-colors">
         <Routes>
           <Route path="/" element={<HomeScreen />} />
           <Route path="/calendar" element={<CalendarScreen />} />
@@ -45,9 +46,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ThemeProvider>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ThemeProvider>
   );
 }
 

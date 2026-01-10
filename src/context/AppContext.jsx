@@ -36,11 +36,9 @@ export const AppProvider = ({ children }) => {
       if (useApi) {
         try {
           // Get authenticated user from cookie
-          console.log("Checking authentication...");
           const response = await authApi.getCurrentUser();
           const authenticatedUser = response.user;
 
-          console.log("Authenticated user:", authenticatedUser);
           setUser(authenticatedUser);
 
           // Fetch projects and tasks from API
@@ -49,14 +47,9 @@ export const AppProvider = ({ children }) => {
             tasksApi.getAll(),
           ]);
 
-          console.log("Loaded from API:", {
-            projects: projectsData.length,
-            tasks: tasksData.length,
-          });
           setProjects(projectsData);
           setTasks(tasksData);
         } catch (apiError) {
-          console.error("Not authenticated or API error:", apiError);
           // User not authenticated - they'll see the login screen
           setUser(null);
           setProjects([]);
@@ -64,13 +57,11 @@ export const AppProvider = ({ children }) => {
         }
       } else {
         // Load from localStorage only
-        console.log("API disabled, using localStorage only");
         setProjects(storage.getProjects());
         setTasks(storage.getTasks());
         setUser(storage.getUser());
       }
     } catch (err) {
-      console.error("Error loading data:", err);
       setError(err.message);
       setUser(null);
       setProjects([]);
@@ -93,7 +84,6 @@ export const AppProvider = ({ children }) => {
         return newProject;
       }
     } catch (err) {
-      console.error("Error creating project:", err);
       throw err;
     }
   };
@@ -112,7 +102,6 @@ export const AppProvider = ({ children }) => {
         return updated;
       }
     } catch (err) {
-      console.error("Error updating project:", err);
       throw err;
     }
   };
@@ -131,7 +120,6 @@ export const AppProvider = ({ children }) => {
         setTasks((prev) => prev.filter((t) => t.projectId !== id));
       }
     } catch (err) {
-      console.error("Error deleting project:", err);
       throw err;
     }
   };
@@ -149,7 +137,6 @@ export const AppProvider = ({ children }) => {
         return newTask;
       }
     } catch (err) {
-      console.error("Error creating task:", err);
       throw err;
     }
   };
@@ -172,7 +159,6 @@ export const AppProvider = ({ children }) => {
         return updated;
       }
     } catch (err) {
-      console.error("Error updating task:", err);
       throw err;
     }
   };
@@ -187,7 +173,6 @@ export const AppProvider = ({ children }) => {
         setTasks((prev) => prev.filter((t) => t.id !== Number.parseInt(id)));
       }
     } catch (err) {
-      console.error("Error deleting task:", err);
       throw err;
     }
   };
@@ -224,7 +209,6 @@ export const AppProvider = ({ children }) => {
         setUser(updatedUser);
       }
     } catch (err) {
-      console.error("Error updating user:", err);
       throw err;
     }
   };
@@ -240,7 +224,6 @@ export const AppProvider = ({ children }) => {
       setUser(null);
       storage.clearAllData();
     } catch (err) {
-      console.error("Error logging out:", err);
       // Clear state anyway
       setProjects([]);
       setTasks([]);
@@ -260,7 +243,6 @@ export const AppProvider = ({ children }) => {
       setUser(null);
       storage.clearAllData();
     } catch (err) {
-      console.error("Error clearing data:", err);
       // Clear state anyway
       setProjects([]);
       setTasks([]);

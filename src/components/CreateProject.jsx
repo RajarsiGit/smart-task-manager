@@ -57,7 +57,6 @@ const CreateProject = () => {
       }
       navigate("/");
     } catch (error) {
-      console.error("Error saving project:", error);
       alert("Failed to save project. Please try again.");
     } finally {
       setIsSaving(false);
