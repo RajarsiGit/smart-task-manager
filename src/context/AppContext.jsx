@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import PropTypes from "prop-types";
-import { authApi, userApi, projectsApi, tasksApi } from "../utils/api";
+import { authApi, userApi, projectsApi, tasksApi, importApi } from "../utils/api";
 import * as storage from "../utils/localStorage";
 
 const AppContext = createContext();
@@ -251,6 +251,28 @@ export const AppProvider = ({ children }) => {
     }
   };
 
+  const importData = async (data) => {
+    try {
+      if (useApi && user) {
+        // API Mode: Call import endpoint
+        await importApi.importData(data);
+
+        // Reload data from server to sync state
+        await loadData();
+      } else {
+        // localStorage Mode: Clear and import
+        storage.importData(data);
+
+        // Reload from localStorage
+        setProjects(storage.getProjects());
+        setTasks(storage.getTasks());
+        setUser(storage.getUser());
+      }
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const value = useMemo(
     () => ({
       projects,
@@ -273,6 +295,7 @@ export const AppProvider = ({ children }) => {
       updateUserProfile,
       logout,
       clearAllData,
+      importData,
       loadData,
     }),
     [projects, tasks, user, selectedDate, loading, error]

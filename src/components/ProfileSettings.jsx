@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 import { authApi } from "../utils/api";
@@ -6,7 +6,7 @@ import LoadingSpinner from "./LoadingSpinner";
 
 const ProfileSettings = () => {
   const navigate = useNavigate();
-  const { user, updateUserProfile, clearAllData, logout, projects, tasks } =
+  const { user, updateUserProfile, clearAllData, logout, projects, tasks, importData } =
     useApp();
   const [name, setName] = useState(user?.name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -22,6 +22,13 @@ const ProfileSettings = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showImportSuccessModal, setShowImportSuccessModal] = useState(false);
+  const [showImportErrorModal, setShowImportErrorModal] = useState(false);
+  const [importErrorMessage, setImportErrorMessage] = useState("");
+  const [selectedImportData, setSelectedImportData] = useState(null);
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Fetch fresh user data from API when component mounts
   useEffect(() => {
@@ -173,6 +180,132 @@ const ProfileSettings = () => {
     } catch {
       setShowExportErrorModal(true);
     }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.name.endsWith('.json')) {
+      setImportErrorMessage('Please select a JSON file');
+      setShowImportErrorModal(true);
+      return;
+    }
+
+    // Read file
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        const validation = validateImportData(data);
+
+        if (validation.valid) {
+          setSelectedImportData(data);
+          setShowImportModal(true);
+        } else {
+          setImportErrorMessage(validation.error);
+          setShowImportErrorModal(true);
+        }
+      } catch {
+        setImportErrorMessage('Invalid JSON file. Please select a valid export file.');
+        setShowImportErrorModal(true);
+      }
+    };
+
+    reader.onerror = () => {
+      setImportErrorMessage('Failed to read file');
+      setShowImportErrorModal(true);
+    };
+
+    reader.readAsText(file);
+
+    // Reset input
+    event.target.value = '';
+  };
+
+  const validateImportData = (data) => {
+    // Check version
+    if (!data.version || data.version !== "1.0") {
+      return {
+        valid: false,
+        error: `Unsupported version: ${data.version || 'unknown'}. This app supports version 1.0`
+      };
+    }
+
+    // Check required root fields
+    if (!data.exportDate) {
+      return { valid: false, error: 'Missing required field: exportDate' };
+    }
+
+    // Validate user object
+    if (!data.user || typeof data.user !== 'object') {
+      return { valid: false, error: 'Missing or invalid user data' };
+    }
+    if (!data.user.name || typeof data.user.name !== 'string') {
+      return { valid: false, error: 'Invalid user name' };
+    }
+
+    // Validate projects array
+    if (!Array.isArray(data.projects)) {
+      return { valid: false, error: 'Missing or invalid projects array' };
+    }
+    for (let i = 0; i < data.projects.length; i++) {
+      const p = data.projects[i];
+      if (typeof p.id !== 'number' || !p.name || !p.title || !p.color) {
+        return {
+          valid: false,
+          error: `Invalid project at index ${i}: missing required fields`
+        };
+      }
+    }
+
+    // Validate tasks array
+    if (!Array.isArray(data.tasks)) {
+      return { valid: false, error: 'Missing or invalid tasks array' };
+    }
+    for (let i = 0; i < data.tasks.length; i++) {
+      const t = data.tasks[i];
+      if (typeof t.id !== 'number' || !t.title || !t.date) {
+        return {
+          valid: false,
+          error: `Invalid task at index ${i}: missing required fields`
+        };
+      }
+      if (t.status && !['pending', 'in_progress', 'completed'].includes(t.status)) {
+        return {
+          valid: false,
+          error: `Invalid task status at index ${i}: ${t.status}`
+        };
+      }
+    }
+
+    return { valid: true, error: null };
+  };
+
+  const confirmImport = async () => {
+    setIsImporting(true);
+    try {
+      await importData(selectedImportData);
+      setShowImportModal(false);
+      setSelectedImportData(null);
+      setShowImportSuccessModal(true);
+    } catch (err) {
+      setShowImportModal(false);
+      setImportErrorMessage(err.message || 'Failed to import data. Please try again.');
+      setShowImportErrorModal(true);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const cancelImport = () => {
+    setShowImportModal(false);
+    setSelectedImportData(null);
   };
 
   // Show only loader while fetching initial data
@@ -341,36 +474,69 @@ const ProfileSettings = () => {
             </button>
           </div>
 
-          {/* Data Export */}
+          {/* Data Management */}
           <div className="mt-6">
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
               <h3 className="text-sm font-medium text-gray-700 mb-2">
-                Export Your Data
+                Data Management
               </h3>
               <p className="text-sm text-gray-600 mb-3">
-                Download all your projects and tasks as a JSON file for backup
-                or migration.
+                Export your data for backup or import previously exported data.
               </p>
-              <button
-                type="button"
-                onClick={handleExportData}
-                className="w-full bg-blue-600 text-white py-2 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+
+              {/* Button row */}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={handleExportData}
+                  className="flex-1 bg-blue-600 text-white py-2 rounded-xl font-semibold hover:bg-blue-700 transition flex items-center justify-center gap-2"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  />
-                </svg>
-                Export Data
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Export
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleImportClick}
+                  className="flex-1 bg-green-600 text-white py-2 rounded-xl font-semibold hover:bg-green-700 transition flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                    />
+                  </svg>
+                  Import
+                </button>
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json,application/json"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
           </div>
 
@@ -548,6 +714,153 @@ const ProfileSettings = () => {
               </p>
               <button
                 onClick={() => setShowExportErrorModal(false)}
+                className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Import Confirmation Modal */}
+        {showImportModal && selectedImportData && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-orange-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-center mb-2">
+                Import Data?
+              </h3>
+
+              <div className="bg-gray-50 rounded-xl p-4 mb-4">
+                <p className="text-sm text-gray-700 mb-2">This will import:</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• {selectedImportData.projects.length} projects</li>
+                  <li>• {selectedImportData.tasks.length} tasks</li>
+                </ul>
+                <p className="text-sm text-gray-500 mt-2">
+                  Exported on: {new Date(selectedImportData.exportDate).toLocaleDateString()}
+                </p>
+              </div>
+
+              <p className="text-red-600 text-sm text-center mb-6 font-medium">
+                Warning: This will replace all your current projects and tasks. This action cannot be undone.
+              </p>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelImport}
+                  disabled={isImporting}
+                  className="flex-1 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmImport}
+                  disabled={isImporting}
+                  className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition disabled:opacity-50"
+                >
+                  {isImporting ? 'Importing...' : 'Import'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Import Success Modal */}
+        {showImportSuccessModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-center mb-2">
+                Import Successful!
+              </h3>
+
+              <p className="text-gray-600 text-center mb-6">
+                Your data has been imported successfully. All projects and tasks have been restored.
+              </p>
+
+              <button
+                onClick={() => {
+                  setShowImportSuccessModal(false);
+                  navigate('/');
+                }}
+                className="w-full px-4 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Import Error Modal */}
+        {showImportErrorModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-3xl shadow-2xl p-6 max-w-md w-full animate-fadeIn">
+              <div className="flex items-center justify-center mb-4">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+                  <svg
+                    className="w-8 h-8 text-red-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <h3 className="text-xl font-bold text-center mb-2">
+                Import Failed
+              </h3>
+
+              <p className="text-gray-600 text-center mb-6">
+                {importErrorMessage || 'Failed to import data. Please check the file and try again.'}
+              </p>
+
+              <button
+                onClick={() => {
+                  setShowImportErrorModal(false);
+                  setImportErrorMessage("");
+                }}
                 className="w-full px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 transition"
               >
                 OK

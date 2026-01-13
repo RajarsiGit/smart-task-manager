@@ -126,6 +126,58 @@ export const updateUser = (userData) => {
   localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(userData));
 };
 
+// Import data (replace all existing data)
+export const importData = (data) => {
+  // Clear existing data first
+  clearAllData();
+
+  // Import user data
+  if (data.user) {
+    const user = {
+      name: data.user.name,
+      email: data.user.email || 'user@example.com',
+    };
+    updateUser(user);
+  }
+
+  // Import projects with ID remapping
+  const projectIdMap = {};
+
+  for (const project of data.projects) {
+    const newProject = addProject({
+      name: project.name,
+      title: project.title,
+      color: project.color,
+      date: project.date,
+    });
+    projectIdMap[project.id] = newProject.id;
+  }
+
+  // Import tasks with remapped project IDs
+  for (const task of data.tasks) {
+    const newProjectId = task.projectId ? projectIdMap[task.projectId] : null;
+
+    addTask({
+      title: task.title,
+      description: task.description || '',
+      date: task.date,
+      startTime: task.startTime || null,
+      endTime: task.endTime || null,
+      status: task.status || 'pending',
+      tags: task.tags || [],
+      categories: task.categories || [],
+      priority: task.priority || 'medium',
+      projectId: newProjectId,
+    });
+  }
+
+  return {
+    success: true,
+    projectsCount: data.projects.length,
+    tasksCount: data.tasks.length,
+  };
+};
+
 // Clear all data
 export const clearAllData = () => {
   localStorage.removeItem(STORAGE_KEYS.PROJECTS);

@@ -173,6 +173,18 @@ export const tasksApi = {
   },
 };
 
+// ============ IMPORT API ============
+
+export const importApi = {
+  // Import data (replace all user data)
+  importData: async (data) => {
+    return apiFetch("/import", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+};
+
 // ============ MIGRATION HELPER ============
 
 // Migrate localStorage data to database
