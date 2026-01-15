@@ -118,10 +118,14 @@ const AuthScreen = ({ onAuthSuccess }) => {
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 Smart Task Manager
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-600 mb-3">
                 {isLogin
                   ? "Welcome back! Please login to continue"
                   : "Create an account to get started"}
+              </p>
+              <p className="text-gray-500 text-sm">
+                Organize projects, track deadlines, and boost your productivity
+                with calendar views and task priorities.
               </p>
             </div>
 
