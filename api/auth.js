@@ -129,6 +129,13 @@ export default async function handler(req, res) {
 
       const user = result[0];
 
+      // Check if user has a password (OAuth users might not)
+      if (!user.password) {
+        return res.status(401).json({
+          error: "This account uses GitHub login. Please sign in with GitHub.",
+        });
+      }
+
       // Verify password
       const isValidPassword = await bcrypt.compare(password, user.password);
 

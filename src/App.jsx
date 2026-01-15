@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -13,7 +14,19 @@ import LoadingSpinner from "./components/LoadingSpinner";
 function AppContent() {
   const { user, loadData, loading } = useApp();
 
-  const handleAuthSuccess = async (userData) => {
+  // Handle OAuth callback success
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authSuccess = params.get("auth");
+
+    if (authSuccess === "success") {
+      // Clear URL params and reload data
+      window.history.replaceState({}, document.title, window.location.pathname);
+      loadData();
+    }
+  }, [loadData]);
+
+  const handleAuthSuccess = async () => {
     // Reload data after successful authentication
     await loadData();
   };
